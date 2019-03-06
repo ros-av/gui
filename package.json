@@ -1,0 +1,35 @@
+{
+    "name": "@rosav/gui",
+    "description": "The GUI for ROS AV.",
+    "version": "0.0.0",
+    "main": "main.js",
+    "bin": {
+        "rosav-gui": "cli.js"
+    },
+    "scripts": {
+        "start": "electron ."
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/ros-av/gui.git"
+    },
+    "author": "Richie Bendall <richiebendall@gmail.com>",
+    "license": "MIT",
+    "dependencies": {
+        "electron": "^4.0.7",
+        "jquery": "^3.3.1",
+        "material-components-web": "^0.44.1",
+        "normalize.css": "^8.0.1",
+        "vue": "^2.6.8"
+    },
+    "devDependencies": {},
+    "keywords": [
+        "av",
+        "antivirus",
+        "viruslist"
+    ],
+    "bugs": {
+        "url": "https://github.com/Richienb/rosav/issues"
+    },
+    "homepage": "https://github.com/Richienb/rosav#readme"
+}
