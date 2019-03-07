@@ -1,7 +1,5 @@
 import $ from "jquery"
 
-console.log(localStorage)
-
 new Vue({
     el: ".app",
     data: {
@@ -20,6 +18,9 @@ new Vue({
 const list = mdc.list.MDCList.attachTo(document.querySelector('.mdc-list'))
 list.wrapFocus = true
 mdc.autoInit()
+
+const storage = require('node-persist')
+storage.init( /* options ... */ )
 
 $.each($(".mdc-icon-button[data-mdc-auto-init='MDCRipple']"), (_, obj) => {
     obj.MDCRipple.unbounded = true
