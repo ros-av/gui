@@ -35,14 +35,23 @@
 
         .tab {
             margin-top: 16px;
+            margin-right: 16px;
         }
 
         .app {
             display: contents;
         }
 
-        .choose-directory {
+        .mdc-icon-button--textfield {
             margin: 4px;
+        }
+
+        .scan--directory-helper {
+            display: none;
+        }
+
+        .full-width {
+            width: 100%;
         }
     </style>
 
@@ -129,16 +138,16 @@
                 <div class="mdc-top-app-bar--fixed-adjust"></div>
                 <div class="main-content">
                     <div class="tab" v-show="isActiveTab('dashboard')">
-                        <h2>Dashboard</h2>
+                        <h1 class="mdc-typography--headline3">Loading protection status...</h1>
                     </div>
-                    <div class="tab" v-show="isActiveTab('scan')">
+                    <div class="tab" v-show="isActiveTab('scan')"><input type="file" class="scan--directory-helper" webkitdirectory />
                         <button class="mdc-fab mdc-fab--extended" data-mdc-auto-init="MDCRipple">
                             <svg class="mdc-fab__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                                 <path fill="none" d="M0 0h24v24H0V0z" />
                                 <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" /></svg>
                             <span class="mdc-fab__label">Start Scan</span>
-                        </button>
-                        <div class="mdc-text-field mdc-text-field--outlined" data-mdc-auto-init="MDCTextField">
+                        </button><br><br>
+                        <div class="mdc-text-field mdc-text-field--outlined scan--directory full-width" data-mdc-auto-init="MDCTextField">
                             <input type="text" id="tf-outlined" class="mdc-text-field__input">
                             <div class="mdc-notched-outline">
                                 <div class="mdc-notched-outline__leading"></div>
@@ -147,54 +156,45 @@
                                 </div>
                                 <div class="mdc-notched-outline__trailing"></div>
                             </div>
-                            <button class="mdc-icon-button choose-directory" data-mdc-auto-init="MDCRipple">
+                            <button class="mdc-icon-button scan--directory-choose mdc-icon-button--textfield" data-mdc-auto-init="MDCRipple">
                                 <svg class="mdc-icon-button__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                                     <path fill="none" d="M0 0h24v24H0V0z" />
                                     <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z" /></svg></button>
                         </div>
                     </div>
                     <div class="tab" v-show="isActiveTab('quarantine')">
-                        <h2>Quarantine</h2>
+                        <ul class="mdc-list">
+                            <li class="mdc-list-item" tabindex="0" data-mdc-auto-init="MDCRipple">
+                                <span class="mdc-list-item__text">Single-line item</span>
+                                <button class="mdc-icon-button scan--directory-choose mdc-icon-button--textfield" data-mdc-auto-init="MDCRipple">
+                                    <svg class="mdc-icon-button__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                        <path fill="none" d="M0 0h24v24H0V0z" />
+                                        <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z" /></svg></button>
+                            </li>
+                            <li class="mdc-list-item" data-mdc-auto-init="MDCRipple">
+                                <span class="mdc-list-item__text">Single-line item</span>
+                            </li>
+                            <li class="mdc-list-item" data-mdc-auto-init="MDCRipple">
+                                <span class="mdc-list-item__text">Single-line item</span>
+                            </li>
+                        </ul>
                     </div>
                     <div class="tab" v-show="isActiveTab('reports')">
-                        <h2>Reports</h2>
+                        <h2 class="mdc-typography--headline2">Reports</h2>
                     </div>
                     <div class="tab" v-show="isActiveTab('settings')">
-                        <h2>Settings</h2>
+                        <h2 class="mdc-typography--headline2">Settings</h2>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-
     <script src="node_modules\material-components-web\dist\material-components-web.min.js"></script>
-    <script src="node_modules\jquery\dist\jquery.min.js"></script>
     <script src="node_modules\vue\dist\vue.min.js"></script>
 
     <script>
-        new Vue({
-            el: ".app",
-            data: {
-                activeTab: "dashboard"
-            },
-            methods: {
-                isActiveTab(tabId) {
-                    return this.activeTab === tabId
-                },
-                setActiveTab(tabId) {
-                    this.activeTab = tabId
-                }
-            }
-        })
-
-        const list = mdc.list.MDCList.attachTo(document.querySelector('.mdc-list'))
-        list.wrapFocus = true
-        mdc.autoInit()
-
-        $.each($(".mdc-icon-button[data-mdc-auto-init='MDCRipple']"), function(_, obj) {
-            obj.MDCRipple.unbounded = true;
-        });
+        require("./renderer.js")
     </script>
 </body>
 
