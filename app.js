@@ -80,8 +80,6 @@ let hashes = new BloomFilter(
 // Line by line reader
 import LineByLineReader from "line-by-line"
 
-console.time("lblreader");
-
 // Line reader
 const hlr = new LineByLineReader(path.join(storage, "hashlist.txt"), {
     encoding: "utf8",
@@ -100,8 +98,9 @@ hlr.on("line", (line) => {
 
 // Line reader finished
 hlr.on("end", () => {
-    console.timeEnd("lblreader");
-    console.log("Finished loading hashes")
+    $(".main--progress").get(0).MDCLinearProgress.close()
+    $(".scan--loading").hide()
+    $(".scan--start-container").show()
 })
 
 // When directory selected

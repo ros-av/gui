@@ -38,7 +38,8 @@
             margin-right: 16px;
         }
 
-        .app {
+        .app,
+        .scan--start-container {
             display: contents;
         }
 
@@ -56,7 +57,8 @@
             position: absolute;
         }
 
-        .scan--directory-helper {
+        .scan--directory-helper,
+        .scan--start-container {
             display: none;
         }
 
@@ -85,7 +87,7 @@
             <div class="mdc-drawer__header">
                 <h3 class="mdc-drawer__title">ROS AV</h3>
                 <h6 class="mdc-drawer__subtitle">
-                    <div role="progressbar" class="mdc-linear-progress mdc-linear-progress--indeterminate" data-mdc-auto-init="MDCLinearProgress">
+                    <div role="progressbar" class="main--progress mdc-linear-progress mdc-linear-progress--indeterminate" data-mdc-auto-init="MDCLinearProgress">
                         <div class="mdc-linear-progress__buffering-dots"></div>
                         <div class="mdc-linear-progress__buffer"></div>
                         <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
@@ -155,15 +157,16 @@
                 <div class="mdc-top-app-bar--fixed-adjust"></div>
                 <div class="main-content">
                     <div class="tab" v-show="isActiveTab('dashboard')">
-                        <h1 class="mdc-typography--headline3">Loading protection status...</h1>
+                        <h1 class="mdc-typography--headline3">Welcome. ROS AV is running.</h1>
                     </div>
                     <div class="tab" v-show="isActiveTab('scan')"><input type="file" class="scan--directory-helper" webkitdirectory />
-                        <button class="mdc-fab mdc-fab--extended scan--start" data-mdc-auto-init="MDCRipple">
-                            <svg class="mdc-fab__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                                <path fill="none" d="M0 0h24v24H0V0z" />
-                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" /></svg>
-                            <span class="mdc-fab__label">Start Scan</span>
-                        </button><br><br>
+                        <div class="scan--start-container"><button class="mdc-fab mdc-fab--extended scan--start" data-mdc-auto-init="MDCRipple">
+                                <svg class="mdc-fab__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                    <path fill="none" d="M0 0h24v24H0V0z" />
+                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" /></svg>
+                                <span class="mdc-fab__label">Start Scan</span>
+                            </button><br><br></div>
+                        <p class="scan--loading">Loading hashes... (This may take a few minutes)</p>
                         <div class="mdc-text-field mdc-text-field--outlined scan--directory full-width" data-mdc-auto-init="MDCTextField">
                             <input type="text" id="tf-outlined" class="mdc-text-field__input">
                             <div class="mdc-notched-outline">
