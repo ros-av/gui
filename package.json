@@ -16,8 +16,6 @@
     "author": "Richie Bendall <richiebendall@gmail.com>",
     "license": "MIT",
     "dependencies": {
-        "@material/auto-init": "^1.0.0",
-        "@material/ripple": "^1.0.0",
         "babel-preset-env": "^1.7.0",
         "babel-register": "^6.26.0",
         "bloomfilter": "^0.0.18",

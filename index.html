@@ -101,7 +101,7 @@
 
             </div>
             <div class="mdc-drawer__content">
-                <nav class="mdc-list">
+                <nav class="mdc-list main--drawer-content">
                     <a class="mdc-list-item mdc-list-item--activated" tabindex="0" @click="setActiveTab('dashboard')" href="#" aria-selected="true" data-mdc-auto-init="MDCRipple">
                         <svg class="mdc-list-item__graphic" href="#" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
                             <path fill="none" d="M0 0h24v24H0V0z" />
@@ -238,12 +238,51 @@
                         </ul>
                     </div>
                     <div class="tab" v-show="isActiveTab('settings')">
-                        <h2 class="mdc-typography--headline2">Settings</h2>
+                        <div class="mdc-select mdc-select--outlined full-width settings--update-behaviour" data-mdc-auto-init="MDCSelect">
+                            <input type="hidden" name="enhanced-select">
+                            <i class="mdc-select__dropdown-icon"></i>
+                            <div id="demo-selected-text" class="mdc-select__selected-text" role="button" aria-haspopup="listbox" aria-labelledby="demo-label demo-selected-text"></div>
+                            <div class="mdc-select__menu mdc-menu mdc-menu-surface" role="listbox">
+                                <ul class="mdc-list">
+                                    <li class="mdc-list-item mdc-list-item--selected" data-value="automatic" aria-selected="true" role="option" data-mdc-auto-init="MDCRipple">Automatic</li>
+                                    <li class="mdc-list-item" data-value="force" role="option" data-mdc-auto-init="MDCRipple">
+                                        Force
+                                    </li>
+                                    <li class="mdc-list-item" data-value="disable" role="option" data-mdc-auto-init="MDCRipple">
+                                        Disable
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="mdc-notched-outline">
+                                <div class="mdc-notched-outline__leading"></div>
+                                <div class="mdc-notched-outline__notch">
+                                    <label class="mdc-floating-label">Update behaviour</label>
+                                </div>
+                                <div class="mdc-notched-outline__trailing"></div>
+                            </div>
+                        </div><br><br>
+                        <div class="mdc-text-field mdc-text-field--outlined full-width settings--regex-matching" data-mdc-auto-init="MDCTextField">
+                            <input type="text" id="tf-outlined" class="mdc-text-field__input" value="/**/*">
+                            <div class="mdc-notched-outline">
+                                <div class="mdc-notched-outline__leading"></div>
+                                <div class="mdc-notched-outline__notch">
+                                    <label for="tf-outlined" class="mdc-floating-label mdc-floating-label--float-above">Regex for recursive matching</label>
+                                </div>
+                                <div class="mdc-notched-outline__trailing"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div class="mdc-snackbar mdc-snackbar--leading main--snackbar">
+            <div class="mdc-snackbar__surface">
+                <div class="mdc-snackbar__label" role="status" aria-live="polite"></div>
+            </div>
+        </div>
     </div>
+
 
     <script src="node_modules\material-components-web\dist\material-components-web.min.js"></script>
     <script src="node_modules\vue\dist\vue.min.js"></script>
