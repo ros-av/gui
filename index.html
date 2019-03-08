@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Hello World!</title>
+    <title>ROS AV</title>
     <link rel="stylesheet" href="node_modules\material-components-web\dist\material-components-web.min.css">
 
     <style>
@@ -46,6 +46,16 @@
             margin: 4px;
         }
 
+        .mdc-icon-button--list {
+            right: 0;
+            position: absolute;
+        }
+
+        .mdc-icon-button--list2 {
+            right: 48px;
+            position: absolute;
+        }
+
         .scan--directory-helper {
             display: none;
         }
@@ -54,9 +64,14 @@
             width: 100%;
         }
 
-        .mdc-top-app-bar, .mdc-drawer__header {
+        .mdc-top-app-bar,
+        .mdc-drawer__header {
             -webkit-user-select: none;
             -webkit-app-region: drag;
+        }
+
+        .mdc-switch--label {
+            margin-left: 10px;
         }
     </style>
 
@@ -85,14 +100,14 @@
             </div>
             <div class="mdc-drawer__content">
                 <nav class="mdc-list">
-                    <a class="mdc-list-item mdc-list-item--activated" @click="setActiveTab('dashboard')" href="#" aria-selected="true" data-mdc-auto-init="MDCRipple">
+                    <a class="mdc-list-item mdc-list-item--activated" tabindex="0" @click="setActiveTab('dashboard')" href="#" aria-selected="true" data-mdc-auto-init="MDCRipple">
                         <svg class="mdc-list-item__graphic" href="#" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
                             <path fill="none" d="M0 0h24v24H0V0z" />
                             <path d="M19 5v2h-4V5h4M9 5v6H5V5h4m10 8v6h-4v-6h4M9 17v2H5v-2h4M21 3h-8v6h8V3zM11 3H3v10h8V3zm10 8h-8v10h8V11zm-10 4H3v6h8v-6z" />
                         </svg>
                         <span class="mdc-list-item__text">Dashboard</span>
                     </a>
-                    <a class="mdc-list-item" @click="setActiveTab('scan')" href="#" data-mdc-auto-init="MDCRipple">
+                    <a class="mdc-list-item" tabindex="0" @click="setActiveTab('scan')" href="#" data-mdc-auto-init="MDCRipple">
                         <svg class="mdc-list-item__graphic" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                             <path fill="none" d="M0 0h24v24H0V0z" />
                             <path
@@ -101,8 +116,7 @@
                         </svg>
                         <span class="mdc-list-item__text">Scan</span>
                     </a>
-                    <a class="mdc-list-item" @click="setActiveTab('quarantine')" href="#" data-mdc-auto-init="MDCRipple">
-
+                    <a class="mdc-list-item" tabindex="0" @click="setActiveTab('quarantine')" href="#" data-mdc-auto-init="MDCRipple">
                         <svg class="mdc-list-item__graphic" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                             <path fill="none" d="M0 0h24v24H0V0z" />
                             <path
@@ -111,16 +125,14 @@
                         </svg>
                         <span class="mdc-list-item__text">Quarantine</span>
                     </a>
-                    <a class="mdc-list-item" @click="setActiveTab('reports')" href="#" data-mdc-auto-init="MDCRipple">
-
+                    <a class="mdc-list-item" tabindex="0" @click="setActiveTab('reports')" href="#" data-mdc-auto-init="MDCRipple">
                         <svg class="mdc-list-item__graphic" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                             <path fill="none" d="M0 0h24v24H0V0z" />
                             <path d="M21 4H3c-1.1 0-2 .9-2 2v13c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zM3 19V6h8v13H3zm18 0h-8V6h8v13zm-7-9.5h6V11h-6zm0 2.5h6v1.5h-6zm0 2.5h6V16h-6z" aria-hidden="true" />
                         </svg>
                         <span class="mdc-list-item__text">Reports</span>
                     </a>
-                    <a class="mdc-list-item" @click="setActiveTab('settings')" href="#" data-mdc-auto-init="MDCRipple">
-
+                    <a class="mdc-list-item" tabindex="0" @click="setActiveTab('settings')" href="#" data-mdc-auto-init="MDCRipple">
                         <svg class="mdc-list-item__graphic" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                             <path fill="none" d="M0 0h24v24H0V0z" />
                             <path
@@ -146,7 +158,7 @@
                         <h1 class="mdc-typography--headline3">Loading protection status...</h1>
                     </div>
                     <div class="tab" v-show="isActiveTab('scan')"><input type="file" class="scan--directory-helper" webkitdirectory />
-                        <button class="mdc-fab mdc-fab--extended" data-mdc-auto-init="MDCRipple">
+                        <button class="mdc-fab mdc-fab--extended scan--start" data-mdc-auto-init="MDCRipple">
                             <svg class="mdc-fab__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                                 <path fill="none" d="M0 0h24v24H0V0z" />
                                 <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" /></svg>
@@ -161,31 +173,66 @@
                                 </div>
                                 <div class="mdc-notched-outline__trailing"></div>
                             </div>
-                            <button class="mdc-icon-button scan--directory-choose mdc-icon-button--textfield" data-mdc-auto-init="MDCRipple">
+                            <button title="Choose directory" class="mdc-icon-button scan--directory-choose mdc-icon-button--textfield" data-mdc-auto-init="MDCRipple">
                                 <svg class="mdc-icon-button__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                                     <path fill="none" d="M0 0h24v24H0V0z" />
                                     <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z" /></svg></button>
+                        </div><br><br>
+                        <div class="mdc-switch" data-mdc-auto-init="MDCSwitch">
+                            <div class="mdc-switch__track"></div>
+                            <div class="mdc-switch__thumb-underlay">
+                                <div class="mdc-switch__thumb">
+                                    <input type="checkbox" id="basic-switch" class="mdc-switch__native-control" role="switch">
+                                </div>
+                            </div>
                         </div>
+                        <label class="mdc-switch--label" for="basic-switch">Recursive scanning</label>
+                    </div>
+                    <div class="tab" v-show="isActiveTab('scanning')">
+                        <button class="mdc-fab mdc-fab--extended" @click="setActiveTab('scanning')" data-mdc-auto-init="MDCRipple">
+                            <svg class="mdc-fab__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                <path fill="none" d="M0 0h24v24H0V0z" />
+                                <path d="M16 8v8H8V8h8m2-2H6v12h12V6z" /></svg>
+                            <span class="mdc-fab__label">Stop Scan</span>
+                        </button>
                     </div>
                     <div class="tab" v-show="isActiveTab('quarantine')">
                         <ul class="mdc-list">
-                            <li class="mdc-list-item" tabindex="0" data-mdc-auto-init="MDCRipple">
+                            <li class="mdc-list-item" tabindex="0">
                                 <span class="mdc-list-item__text">Single-line item</span>
-                                <button class="mdc-icon-button scan--directory-choose mdc-icon-button--textfield" data-mdc-auto-init="MDCRipple">
+                                <button title="Restore" class="mdc-icon-button mdc-icon-button--list2" data-mdc-auto-init="MDCRipple">
                                     <svg class="mdc-icon-button__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                                         <path fill="none" d="M0 0h24v24H0V0z" />
-                                        <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z" /></svg></button>
-                            </li>
-                            <li class="mdc-list-item" data-mdc-auto-init="MDCRipple">
-                                <span class="mdc-list-item__text">Single-line item</span>
-                            </li>
-                            <li class="mdc-list-item" data-mdc-auto-init="MDCRipple">
-                                <span class="mdc-list-item__text">Single-line item</span>
+                                        <path d="M15.5 4l-1-1h-5l-1 1H5v2h14V4zM6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zm2-5V9h8v10H8v-5zm2 4h4v-4h2l-4-4-4 4h2z" />
+                                    </svg></button>
+                                <button title="Delete forever" class="mdc-icon-button mdc-icon-button--list" data-mdc-auto-init="MDCRipple">
+                                    <svg class="mdc-icon-button__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                        <path fill="none" d="M0 0h24v24H0V0z" />
+                                        <path
+                                            d="M14.12 10.47L12 12.59l-2.13-2.12-1.41 1.41L10.59 14l-2.12 2.12 1.41 1.41L12 15.41l2.12 2.12 1.41-1.41L13.41 14l2.12-2.12zM15.5 4l-1-1h-5l-1 1H5v2h14V4zM6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9z" />
+                                    </svg></button>
                             </li>
                         </ul>
                     </div>
                     <div class="tab" v-show="isActiveTab('reports')">
-                        <h2 class="mdc-typography--headline2">Reports</h2>
+                        <ul class="mdc-list">
+                            <li class="mdc-list-item" tabindex="0">
+                                <span class="mdc-list-item__text">Single-line item</span>
+                                <button title="View" class="mdc-icon-button mdc-icon-button--list2" data-mdc-auto-init="MDCRipple">
+                                    <svg class="mdc-icon-button__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                        <g fill="none">
+                                            <path d="M0 0h24v24H0V0z" />
+                                            <path opacity=".87" d="M0 0h24v24H0V0z" />
+                                        </g>
+                                        <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7zm-4 6h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z" />
+                                    </svg></button>
+                                <button title="Delete" class="mdc-icon-button mdc-icon-button--list" data-mdc-auto-init="MDCRipple">
+                                    <svg class="mdc-icon-button__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                        <path fill="none" d="M0 0h24v24H0V0z" />
+                                        <path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z" />
+                                    </svg></button>
+                            </li>
+                        </ul>
                     </div>
                     <div class="tab" v-show="isActiveTab('settings')">
                         <h2 class="mdc-typography--headline2">Settings</h2>
