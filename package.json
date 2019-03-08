@@ -4,7 +4,7 @@
     "version": "0.0.0",
     "main": "main.js",
     "bin": {
-        "rosav-gui": "cli.js"
+        "rosav-gui": "electron"
     },
     "scripts": {
         "start": "electron ."
