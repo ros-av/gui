@@ -19,6 +19,7 @@
         "babel-preset-env": "^1.7.0",
         "babel-register": "^6.26.0",
         "bloomfilter": "^0.0.18",
+        "chokidar": "^2.1.2",
         "dayjs": "^1.8.9",
         "electron": "^4.0.7",
         "graceful-fs": "^4.1.15",

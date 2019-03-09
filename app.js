@@ -91,43 +91,71 @@ let hashes = new BloomFilter(
     33 // Number of hash functions
 )
 
+// If hashes have loaded
+let hashesLoaded = false
+
+const countFileLines = (filePath) => {
+    return new Promise((resolve, reject) => {
+        let lineCount = 0
+        fs.createReadStream(filePath)
+            .on("data", (buffer) => {
+                let idx = -1
+                lineCount--
+                do {
+                    idx = buffer.indexOf(10, idx + 1)
+                    lineCount++
+                } while (idx !== -1)
+            }).on("end", () => {
+                resolve(lineCount)
+            }).on("error", reject)
+    })
+}
+
 // Line by line reader
 import LineByLineReader from "line-by-line"
 
+countFileLines(path.join(storage, "hashlist.txt")).then((lines) => {
+    $(".main--progress").get(0).MDCLinearProgress.determinate = true
+
+    let done = 0
+
+    // Line reader
+    const hlr = new LineByLineReader(path.join(storage, "hashlist.txt"), {
+        encoding: "utf8",
+        skipEmptyLines: true
+    })
+
+    // Line reader error
+    hlr.on("error", (err) => {
+        handleError(err)
+    })
+
+    // New line from line reader
+    hlr.on("line", (line) => {
+        done++
+        $(".main--progress").get(0).MDCLinearProgress.progress = done / lines
+        hashes.add(line)
+    })
+
+    // Line reader finished
+    hlr.on("end", () => {
+        $(".main--progress").get(0).MDCLinearProgress.close()
+        $(".scan--loading").hide()
+        $(".scan--start-container").show()
+        hashesLoaded = true
+    })
+})
+
 // Request parameters
-const requestParams = (url, json = false) => {
-    return {
-        url: url,
-        json: json,
-        gzip: true,
-        method: "GET",
-        headers: {
-            "User-Agent": "rosav (nodejs)"
-        }
+const requestParams = (url, json = false) => ({
+    url,
+    json,
+    gzip: true,
+    method: "GET",
+
+    headers: {
+        "User-Agent": "rosav (nodejs)"
     }
-}
-
-// Line reader
-const hlr = new LineByLineReader(path.join(storage, "hashlist.txt"), {
-    encoding: "utf8",
-    skipEmptyLines: true
-})
-
-// Line reader error
-hlr.on("error", (err) => {
-    handleError(err)
-})
-
-// New line from line reader
-hlr.on("line", (line) => {
-    hashes.add(line)
-})
-
-// Line reader finished
-hlr.on("end", () => {
-    $(".main--progress").get(0).MDCLinearProgress.close()
-    $(".scan--loading").hide()
-    $(".scan--start-container").show()
 })
 
 // When directory selected
@@ -144,14 +172,10 @@ $(".scan--directory-choose").click(() => {
 
 // External file requester
 import request from "request"
-
 import rprog from "request-progress"
 
 // Time parser
 import dayjs from "dayjs"
-
-// MD5 from file
-import MD5File from "md5-file"
 
 // If scan start triggered
 $(".scan--start").click(() => {
@@ -159,24 +183,128 @@ $(".scan--start").click(() => {
     app.setActiveTab('scanning')
 })
 
+// Settings manager
 const manageSettings = (el, name) => {
     if (el.hasClass("mdc-select")) {
-        const select = el.get(0).MDCSelect
-        if (db.getItem(name)) select.value = db.getItem(name)
-        select.listen('MDCSelect:change', () => {
-            db.setItem(name, select.value)
+        const mdcSelect = el.get(0).MDCSelect
+        db.getItem(name).then((content) => {
+            if (content) mdcSelect.value = content
+        })
+        mdcSelect.listen('MDCSelect:change', () => {
+            db.setItem(name, mdcSelect.value)
         })
     } else if (el.hasClass("mdc-text-field")) {
-        const textField = el
-        if (db.getItem(name)) textField.get(0).MDCTextField.value = db.getItem(name)
-        textField.find("input").on("input", () => {
-            db.setItem(name, textField.get(0).MDCTextField.value)
+        const mdcTextField = el
+        db.getItem(name).then((content) => {
+            if (content) mdcTextField.get(0).MDCTextField.value = content
         })
+        mdcTextField.find("input").on("input", () => {
+            db.setItem(name, mdcTextField.get(0).MDCTextField.value)
+        })
+    } else if (el.hasClass("mdc-switch")) {
+        const mdcSwitch = el
+        db.getItem(name).then((content) => {
+            if (content) mdcSwitch.get(0).MDCSwitch.checked = content
+        })
+        mdcSwitch.find(".mdc-switch__native-control").on('change', () => {
+            db.setItem(name, mdcSwitch.get(0).MDCSwitch.checked)
+        })
+    } else {
+        snackBarMessage(`Error syncronising ${name}.`)
     }
 }
 
 manageSettings($(".settings--update-behaviour"), "update-behaviour")
 manageSettings($(".settings--regex-matching"), "regex-matching")
+manageSettings($(".settings--rtp"), "rtp")
+manageSettings($(".settings--recursive-scan"), "recursive-scan")
+
+// MD5 from file
+import MD5File from "md5-file"
+
+const safe = (dir) => {
+    fs.lstat(dir, (err, stats) => {
+        if (err) {
+            handleError(err)
+        }
+        // If path is not a directory
+        if (!stats.isDirectory()) {
+            // Get the MD5 of a file
+            MD5File(dir, (err, hash) => {
+                if (err) {
+                    handleError(err)
+                }
+                // If the hash is in the list
+                if (hashes.test(hash)) {
+                    console.log(c.red(`${dir} is dangerous!`))
+
+                    if (args.action === "remove") {
+                        // Delete the file
+                        fs.unlink(dir, (err) => {
+                            if (err) {
+                                handleError(err)
+                            }
+                            if (args.verbose) {
+                                // If verbose is enabled
+                                console.log(c.green(`${dir} successfully deleted.`))
+                            }
+                        })
+                    } else if (args.action === "quarantine") {
+                        fs.rename(dir, path.resolve(path.join(args.data, "quarantine"), path.basename(dir)), (err) => {
+                            if (err) {
+                                handleError(err)
+                            }
+                            if (args.verbose) {
+                                // If verbose is enabled
+                                console.log(c.green(`${dir} successfully quarantined.`))
+                            }
+                        })
+                    }
+                    updateCLIProgress()
+                } else {
+                    if (args.verbose) {
+                        // Otherwise, if verbose is enabled
+                        console.log(c.green(`${path} is safe.`))
+                    }
+                    updateCLIProgress()
+                }
+            })
+        } else {
+            updateCLIProgress()
+        }
+
+    })
+}
+
+// Root directory
+// const watchDir = path.parse(process.cwd()).root
+
+// Home directory
+const watchDir = require('os').homedir()
+
+import chokidar from 'chokidar'
+
+// const watcher = chokidar.watch(watchDir, {
+//     persistent: true
+// })
+//
+// watcher
+//     .on('add', dir => {
+//         console.log('File', dir, 'has been added')
+//     })
+//     .on('change', dir => {
+//         console.log('File', dir, 'has been changed')
+//     })
+//     .on('unlink', dir => {
+//         console.log('File', dir, 'has been removed')
+//     })
+//     .on('error', err => {
+//         if (err.code = "EPERM") {
+//             console.warn(`Not enough perms not provided to watch a directory. Please run ROS AV as administrator (${err.message})`)
+//         } else {
+//             snackBarMessage(`An real time protection error occurred: ${err}`)
+//         }
+//     })
 
 // Execute plugins
 fs.readdir(path.join(storage, "plugins"), (err, items) => {

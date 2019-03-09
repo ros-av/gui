@@ -180,16 +180,7 @@
                                 <svg class="mdc-icon-button__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                                     <path fill="none" d="M0 0h24v24H0V0z" />
                                     <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z" /></svg></button>
-                        </div><br><br>
-                        <div class="mdc-switch" data-mdc-auto-init="MDCSwitch">
-                            <div class="mdc-switch__track"></div>
-                            <div class="mdc-switch__thumb-underlay">
-                                <div class="mdc-switch__thumb">
-                                    <input type="checkbox" id="basic-switch" class="mdc-switch__native-control" role="switch">
-                                </div>
-                            </div>
                         </div>
-                        <label class="mdc-switch--label" for="basic-switch">Recursive scanning</label>
                     </div>
                     <div class="tab" v-show="isActiveTab('scanning')">
                         <button class="mdc-fab mdc-fab--extended" @click="setActiveTab('scanning')" data-mdc-auto-init="MDCRipple">
@@ -238,6 +229,16 @@
                         </ul>
                     </div>
                     <div class="tab" v-show="isActiveTab('settings')">
+                        <div class="mdc-switch mdc-switch--checked settings--rtp" data-mdc-auto-init="MDCSwitch">
+                            <div class="mdc-switch__track"></div>
+                            <div class="mdc-switch__thumb-underlay">
+                                <div class="mdc-switch__thumb">
+                                    <input type="checkbox" id="basic-switch" class="mdc-switch__native-control" role="switch" checked>
+                                </div>
+                            </div>
+                        </div>
+                        <label class="mdc-switch--label" for="basic-switch">Real time protection</label>
+                        <br><br>
                         <div class="mdc-select mdc-select--outlined full-width settings--update-behaviour" data-mdc-auto-init="MDCSelect">
                             <input type="hidden" name="enhanced-select">
                             <i class="mdc-select__dropdown-icon"></i>
@@ -261,6 +262,15 @@
                                 <div class="mdc-notched-outline__trailing"></div>
                             </div>
                         </div><br><br>
+                        <div class="mdc-switch settings--recursive-scan" data-mdc-auto-init="MDCSwitch">
+                            <div class="mdc-switch__track"></div>
+                            <div class="mdc-switch__thumb-underlay">
+                                <div class="mdc-switch__thumb">
+                                    <input type="checkbox" id="basic-switch" class="mdc-switch__native-control" role="switch">
+                                </div>
+                            </div>
+                        </div>
+                        <label class="mdc-switch--label" for="basic-switch">Recursive scanning</label><br><br>
                         <div class="mdc-text-field mdc-text-field--outlined full-width settings--regex-matching" data-mdc-auto-init="MDCTextField">
                             <input type="text" id="tf-outlined" class="mdc-text-field__input" value="/**/*">
                             <div class="mdc-notched-outline">
