@@ -1,5 +1,3 @@
-import $ from "jquery"
-
 const app = new Vue({
     el: ".app",
     data: {
@@ -53,6 +51,8 @@ db.init({
     dir: path.join(storage, "db")
 })
 
+import $ from "jquery"
+
 // Intialise MDC list
 const list = mdc.list.MDCList.attachTo($('.main--drawer-content').get(0))
 
@@ -94,22 +94,20 @@ let hashes = new BloomFilter(
 // If hashes have loaded
 let hashesLoaded = false
 
-const countFileLines = (filePath) => {
-    return new Promise((resolve, reject) => {
-        let lineCount = 0
-        fs.createReadStream(filePath)
-            .on("data", (buffer) => {
-                let idx = -1
-                lineCount--
-                do {
-                    idx = buffer.indexOf(10, idx + 1)
-                    lineCount++
-                } while (idx !== -1)
-            }).on("end", () => {
-                resolve(lineCount)
-            }).on("error", reject)
-    })
-}
+const countFileLines = filePath => new Promise((resolve, reject) => {
+    let lineCount = 0
+    fs.createReadStream(filePath)
+        .on("data", (buffer) => {
+            let idx = -1
+            lineCount--
+            do {
+                idx = buffer.indexOf(10, idx + 1)
+                lineCount++
+            } while (idx !== -1)
+        }).on("end", () => {
+            resolve(lineCount)
+        }).on("error", reject)
+})
 
 // Line by line reader
 import LineByLineReader from "line-by-line"
@@ -127,7 +125,7 @@ countFileLines(path.join(storage, "hashlist.txt")).then((lines) => {
 
     // Line reader error
     hlr.on("error", (err) => {
-        handleError(err)
+        if (err) snackBarMessage(`An error occurred: ${err}`)
     })
 
     // New line from line reader
@@ -170,17 +168,92 @@ $(".scan--directory-choose").click(() => {
     $(".scan--directory-helper").click()
 })
 
-// External file requester
-import request from "request"
-import rprog from "request-progress"
+// // External file requester
+// import request from "request"
+// import rprog from "request-progress"
+//
+// // Time parser
+// import dayjs from "dayjs"
 
-// Time parser
-import dayjs from "dayjs"
+// MD5 from file
+import MD5File from "md5-file"
+
+const safe = dir => new Promise((resolve, reject) => {
+    fs.lstat(path.resolve(dir), (err, stats) => {
+        if (err) reject(err)
+        // If path is a directory
+        if (stats.isDirectory()) resolve(true)
+        // Get the MD5 of a file
+        MD5File(path.resolve(dir), (err, hash) => {
+            if (err) reject(err)
+            // If the hash is in the list
+            resolve(!hashes.test(hash))
+        })
+    })
+})
+
+// Root directory
+// const watchDir = path.parse(process.cwd()).root
+
+// Home directory
+const watchDir = require('os').homedir()
+
+$(".scan--directory").get(0).MDCTextField.value = watchDir
+
+let total = 0
+let done = 0
 
 // If scan start triggered
 $(".scan--start").click(() => {
     // Switch to scanning tab
     app.setActiveTab('scanning')
+
+    db.getItem("recursive-scan").then((recursive) => {
+        if (recursive) {
+            db.getItem("regex-matching").then((regex) => {
+                require("glob")(path.join($(".scan--directory").get(0).MDCTextField.value, regex ? regex : "/**/*"), (err, files) => {
+                    if (err) snackBarMessage(`An error occurred: ${err}`)
+
+                    $(".scanning--progress").get(0).MDCLinearProgress.determinate = true
+
+                    // Start progressbar
+                    total = files.length
+
+                    files.forEach((file) => {
+                        // If the MD5 hash is in the list
+                        safe(file).then((isSafe) => {
+                            if (!isSafe) {
+                                console.log(file)
+                            }
+                            done++
+                            $(".scanning--progress").get(0).MDCLinearProgress.value = done / total
+                        })
+                    })
+                })
+            })
+        } else {
+            fs.readdir(path.resolve($(".scan--directory").get(0).MDCTextField.value), (err, files) => {
+                if (err) snackBarMessage(`An error occurred: ${err}`)
+
+                $(".scanning--progress").get(0).MDCLinearProgress.determinate = true
+
+                // Start progressbar
+                total = files.length
+
+                // For each file
+                files.forEach((file) => {
+                    // If the MD5 hash is in the list
+                    safe(file).then((isSafe) => {
+                        if (!isSafe) {
+                            console.log(file)
+                        }
+                        done++
+                        $(".scanning--progress").get(0).MDCLinearProgress.value = done / total
+                    })
+                })
+            })
+        }
+    })
 })
 
 // Settings manager
@@ -219,69 +292,6 @@ manageSettings($(".settings--regex-matching"), "regex-matching")
 manageSettings($(".settings--rtp"), "rtp")
 manageSettings($(".settings--recursive-scan"), "recursive-scan")
 
-// MD5 from file
-import MD5File from "md5-file"
-
-const safe = (dir) => {
-    fs.lstat(dir, (err, stats) => {
-        if (err) {
-            handleError(err)
-        }
-        // If path is not a directory
-        if (!stats.isDirectory()) {
-            // Get the MD5 of a file
-            MD5File(dir, (err, hash) => {
-                if (err) {
-                    handleError(err)
-                }
-                // If the hash is in the list
-                if (hashes.test(hash)) {
-                    console.log(c.red(`${dir} is dangerous!`))
-
-                    if (args.action === "remove") {
-                        // Delete the file
-                        fs.unlink(dir, (err) => {
-                            if (err) {
-                                handleError(err)
-                            }
-                            if (args.verbose) {
-                                // If verbose is enabled
-                                console.log(c.green(`${dir} successfully deleted.`))
-                            }
-                        })
-                    } else if (args.action === "quarantine") {
-                        fs.rename(dir, path.resolve(path.join(args.data, "quarantine"), path.basename(dir)), (err) => {
-                            if (err) {
-                                handleError(err)
-                            }
-                            if (args.verbose) {
-                                // If verbose is enabled
-                                console.log(c.green(`${dir} successfully quarantined.`))
-                            }
-                        })
-                    }
-                    updateCLIProgress()
-                } else {
-                    if (args.verbose) {
-                        // Otherwise, if verbose is enabled
-                        console.log(c.green(`${path} is safe.`))
-                    }
-                    updateCLIProgress()
-                }
-            })
-        } else {
-            updateCLIProgress()
-        }
-
-    })
-}
-
-// Root directory
-// const watchDir = path.parse(process.cwd()).root
-
-// Home directory
-const watchDir = require('os').homedir()
-
 import chokidar from 'chokidar'
 
 // const watcher = chokidar.watch(watchDir, {
@@ -312,23 +322,21 @@ fs.readdir(path.join(storage, "plugins"), (err, items) => {
         snackBarMessage(`Failed to load plugins because ${err}`)
     }
     items.forEach((dir) => {
-        (() => {
-            if (dir.endsWith(".js")) {
-                fs.readFile(path.join(storage, "plugins", dir), 'utf8', (err, contents) => {
-                    if (err) {
-                        snackBarMessage(`Failed to load ${dir} because ${err}`)
-                    } else {
-                        (() => {
-                            try {
-                                eval(contents)
-                            } catch (err) {
-                                snackBarMessage(`Failed to load ${dir} because ${err}`)
-                            }
-                        })()
-                        snackBarMessage(`Successfully loaded ${dir}`)
-                    }
-                })
-            }
-        })()
+        if (dir.endsWith(".js")) {
+            fs.readFile(path.join(storage, "plugins", dir), 'utf8', (err, contents) => {
+                if (err) {
+                    snackBarMessage(`Failed to load ${dir} because ${err}`)
+                } else {
+                    (() => {
+                        try {
+                            eval(contents)
+                        } catch (err) {
+                            snackBarMessage(`Failed to load ${dir} because ${err}`)
+                        }
+                    })()
+                    snackBarMessage(`Successfully loaded ${dir}`)
+                }
+            })
+        }
     })
 })

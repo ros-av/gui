@@ -189,6 +189,16 @@
                                 <path d="M16 8v8H8V8h8m2-2H6v12h12V6z" /></svg>
                             <span class="mdc-fab__label">Stop Scan</span>
                         </button>
+                        <div role="progressbar" class="scanning--progress mdc-linear-progress mdc-linear-progress--indeterminate" data-mdc-auto-init="MDCLinearProgress">
+                            <div class="mdc-linear-progress__buffering-dots"></div>
+                            <div class="mdc-linear-progress__buffer"></div>
+                            <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+                                <span class="mdc-linear-progress__bar-inner"></span>
+                            </div>
+                            <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+                                <span class="mdc-linear-progress__bar-inner"></span>
+                            </div>
+                        </div>
                     </div>
                     <div class="tab" v-show="isActiveTab('quarantine')">
                         <ul class="mdc-list">
