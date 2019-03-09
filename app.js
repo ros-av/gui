@@ -37,6 +37,9 @@ const populateDirectory = (dir) => {
 // Define storage path
 const storage = path.join(require("temp-dir"), "rosav")
 
+// New storage path (not ready to migrate yet)
+// const storage = require("app-cache-dir")("rosav")
+
 populateDirectory(storage)
 populateDirectory(path.join(storage, "quarantine"))
 populateDirectory(path.join(storage, "reports"))
