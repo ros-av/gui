@@ -43,9 +43,9 @@
         "viruslist"
     ],
     "bugs": {
-        "url": "https://github.com/ros-av/cli/issues"
+        "url": "https://github.com/ros-av/gui/issues"
     },
-    "homepage": "https://github.com/ros-av/cli#readme",
+    "homepage": "https://github.com/ros-av/gui#readme",
     "publishConfig": {
         "access": "public"
     }
