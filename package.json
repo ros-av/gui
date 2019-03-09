@@ -45,7 +45,7 @@
     "bugs": {
         "url": "https://github.com/ros-av/gui/issues"
     },
-    "homepage": "https://github.com/ros-av/gui#readme",
+    "homepage": "https://ros-av.github.io",
     "publishConfig": {
         "access": "public"
     }
