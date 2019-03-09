@@ -43,7 +43,10 @@
         "viruslist"
     ],
     "bugs": {
-        "url": "https://github.com/Richienb/rosav/issues"
+        "url": "https://github.com/ros-av/cli/issues"
     },
-    "homepage": "https://github.com/Richienb/rosav#readme"
+    "homepage": "https://github.com/ros-av/cli#readme",
+    "publishConfig": {
+        "access": "public"
+    }
 }
