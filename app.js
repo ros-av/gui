@@ -206,17 +206,17 @@ const safe = dir => new Promise((resolve, reject) => {
     })
 })
 
-const scan = dir => new Promise((resolve, reject) => {
+const scan = (dir, action) => new Promise((resolve, reject) => {
     safe(file).then((isSafe) => {
         if (!isSafe) {
-            if ($(".settings--threat-handling").get(0).MDCSelect.value === "remove") {
+            if (action === "remove") {
                 // Delete the file
                 fs.unlink(file, (err) => {
                     if (err) reject(err)
                     snackBarMessage(`${file} was identified as a threat and was deleted.`, 0.1)
                     resolve()
                 })
-            } else if ($(".settings--threat-handling").get(0).MDCSelect.value === "quarantine") {
+            } else if (action === "quarantine") {
                 fs.rename(file, path.resolve(path.join(args.data, "quarantine"), path.basename(file)), (err) => {
                     if (err) reject(err)
                     snackBarMessage(`${file} was identified as a threat and was quarantined.`, 0.1)
@@ -260,9 +260,11 @@ $(".scan--start").click(() => {
 
                     files.forEach((file) => {
                         // If the MD5 hash is in the list
-                        scan(file).then(() => {
+                        scan(file, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {
                             done++
                             $(".scanning--progress").get(0).MDCLinearProgress.value = done / total
+                        }, (err) => {
+                            snackBarMessage(`A scanning error occurred: {err}`)
                         })
                     })
                 })
@@ -279,9 +281,11 @@ $(".scan--start").click(() => {
                 // For each file
                 files.forEach((file) => {
                     // If the MD5 hash is in the list
-                    scan(file).then(() => {
+                    scan(file, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {
                         done++
                         $(".scanning--progress").get(0).MDCLinearProgress.value = done / total
+                    }, (err) => {
+                        snackBarMessage(`A scanning error occurred: {err}`)
                     })
                 })
             })
