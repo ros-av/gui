@@ -73,14 +73,25 @@ $.each($(".mdc-icon-button[data-mdc-auto-init='MDCRipple']"), (_, {
     MDCRipple.unbounded = true
 })
 
+// Notifications service
+import notifier from "node-notifier"
+
 // Attach snackbar
 const snackbar = new mdc.snackbar.MDCSnackbar($('.main--snackbar').get(0))
 
 // Display snackbar message
-const snackBarMessage = (message) => {
+const snackBarMessage = (message, volume = 0.0) => {
     snackbar.close()
     snackbar.labelText = message
     snackbar.open()
+    notifier.notify({
+        title: 'ROS AV',
+        message: message,
+        icon: path.join(__dirname, 'icon.ico'),
+        sound: false
+    })
+    $(".ping").get(0).volume = volume
+    $(".ping").get(0).play()
 }
 
 // Bloom filter functionality
@@ -195,6 +206,31 @@ const safe = dir => new Promise((resolve, reject) => {
     })
 })
 
+const scan = dir => new Promise((resolve, reject) => {
+    safe(file).then((isSafe) => {
+        if (!isSafe) {
+            if ($(".settings--threat-handling").get(0).MDCSelect.value === "remove") {
+                // Delete the file
+                fs.unlink(file, (err) => {
+                    if (err) reject(err)
+                    snackBarMessage(`${file} was identified as a threat and was deleted.`, 0.1)
+                    resolve()
+                })
+            } else if ($(".settings--threat-handling").get(0).MDCSelect.value === "quarantine") {
+                fs.rename(file, path.resolve(path.join(args.data, "quarantine"), path.basename(file)), (err) => {
+                    if (err) reject(err)
+                    snackBarMessage(`${file} was identified as a threat and was quarantined.`, 0.1)
+                    resolve()
+                })
+            } else {
+                resolve()
+            }
+        }
+    }, (err) => {
+        reject(err)
+    })
+})
+
 // Root directory
 // const watchDir = path.parse(process.cwd()).root
 
@@ -224,10 +260,7 @@ $(".scan--start").click(() => {
 
                     files.forEach((file) => {
                         // If the MD5 hash is in the list
-                        safe(file).then((isSafe) => {
-                            if (!isSafe) {
-                                console.log(file)
-                            }
+                        scan(file).then(() => {
                             done++
                             $(".scanning--progress").get(0).MDCLinearProgress.value = done / total
                         })
@@ -246,10 +279,7 @@ $(".scan--start").click(() => {
                 // For each file
                 files.forEach((file) => {
                     // If the MD5 hash is in the list
-                    safe(file).then((isSafe) => {
-                        if (!isSafe) {
-                            console.log(file)
-                        }
+                    scan(file).then(() => {
                         done++
                         $(".scanning--progress").get(0).MDCLinearProgress.value = done / total
                     })
@@ -262,7 +292,7 @@ $(".scan--start").click(() => {
 // Settings manager
 const manageSettings = (el, name) => {
     if (el.hasClass("mdc-select")) {
-        const mdcSelect = el.get(0).MDCSelect
+        const mdcSelect = el.get(0).MDCSelect.value
         db.getItem(name).then((content) => {
             if (content) mdcSelect.value = content
         })
@@ -294,30 +324,38 @@ manageSettings($(".settings--update-behaviour"), "update-behaviour")
 manageSettings($(".settings--regex-matching"), "regex-matching")
 manageSettings($(".settings--rtp"), "rtp")
 manageSettings($(".settings--recursive-scan"), "recursive-scan")
+manageSettings($(".settings--threat-handling"), "threat-handling")
 
 import chokidar from 'chokidar'
 
-// const watcher = chokidar.watch(watchDir, {
-//     persistent: true
-// })
-//
-// watcher
-//     .on('add', dir => {
-//         console.log('File', dir, 'has been added')
-//     })
-//     .on('change', dir => {
-//         console.log('File', dir, 'has been changed')
-//     })
-//     .on('unlink', dir => {
-//         console.log('File', dir, 'has been removed')
-//     })
-//     .on('error', err => {
-//         if (err.code = "EPERM") {
-//             console.warn(`Not enough perms not provided to watch a directory. Please run ROS AV as administrator (${err.message})`)
-//         } else {
-//             snackBarMessage(`An real time protection error occurred: ${err}`)
-//         }
-//     })
+let watcher
+
+$(".settings--rtp").find(".mdc-switch__native-control").on('change', () => {
+    if ($(".settings--rtp").get(0).MDCSwitch.checked) {
+        watcher = chokidar.watch(watchDir, {
+            persistent: true
+        })
+
+        watcher
+            .on('add', dir => {
+                console.log('File', dir, 'has been added')
+            })
+            .on('change', dir => {
+                console.log('File', dir, 'has been changed')
+            })
+            .on('error', err => {
+                if (err.code = "EPERM") {
+                    console.warn(`Not enough permissions provided to watch a directory. Please run ROS AV as an administrator (${err.message})`)
+                } else {
+                    snackBarMessage(`An real time protection error occurred: ${err}`)
+                }
+            })
+    } else {
+        if (watcher) watcher.close()
+    }
+})
+
+$(".settings--rtp").find(".mdc-switch__native-control").trigger("change")
 
 // Execute plugins
 fs.readdir(path.join(storage, "plugins"), (err, items) => {

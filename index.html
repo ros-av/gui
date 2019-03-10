@@ -156,6 +156,7 @@
             <div class="drawer-main-content">
                 <div class="mdc-top-app-bar--fixed-adjust"></div>
                 <div class="main-content">
+                    <audio class="ping" src="ping.ogg"></audio>
                     <div class="tab" v-show="isActiveTab('dashboard')">
                         <h1 class="mdc-typography--headline3">Welcome. ROS AV is running.</h1>
                     </div>
@@ -248,6 +249,30 @@
                             </div>
                         </div>
                         <label class="mdc-switch--label" for="basic-switch">Real time protection</label>
+                        <br><br>
+                        <div class="mdc-select mdc-select--outlined full-width settings--threat-handling" data-mdc-auto-init="MDCSelect">
+                            <input type="hidden" name="enhanced-select">
+                            <i class="mdc-select__dropdown-icon"></i>
+                            <div id="demo-selected-text" class="mdc-select__selected-text" role="button" aria-haspopup="listbox" aria-labelledby="demo-label demo-selected-text"></div>
+                            <div class="mdc-select__menu mdc-menu mdc-menu-surface" role="listbox">
+                                <ul class="mdc-list">
+                                    <li class="mdc-list-item mdc-list-item--selected" data-value="nothing" aria-selected="true" role="option" data-mdc-auto-init="MDCRipple">Nothing</li>
+                                    <li class="mdc-list-item" data-value="quarantine" role="option" data-mdc-auto-init="MDCRipple">
+                                        Quarantine
+                                    </li>
+                                    <li class="mdc-list-item" data-value="remove" role="option" data-mdc-auto-init="MDCRipple">
+                                        Remove
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="mdc-notched-outline">
+                                <div class="mdc-notched-outline__leading"></div>
+                                <div class="mdc-notched-outline__notch">
+                                    <label class="mdc-floating-label">Automatic threat handling</label>
+                                </div>
+                                <div class="mdc-notched-outline__trailing"></div>
+                            </div>
+                        </div>
                         <br><br>
                         <div class="mdc-select mdc-select--outlined full-width settings--update-behaviour" data-mdc-auto-init="MDCSelect">
                             <input type="hidden" name="enhanced-select">

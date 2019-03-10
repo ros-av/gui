@@ -29,6 +29,7 @@
         "line-by-line": "^0.1.6",
         "material-components-web": "^1.0.0",
         "md5-file": "^4.0.0",
+        "node-notifier": "^5.4.0",
         "node-persist": "^3.0.4",
         "normalize.css": "^8.0.1",
         "request": "^2.88.0",
