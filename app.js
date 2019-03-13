@@ -166,7 +166,7 @@ const requestParams = (url, json = false) => ({
     method: "GET",
 
     headers: {
-        "User-Agent": "rosav (nodejs)"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0 WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3163.100 Safari/537.36"
     }
 })
 
@@ -192,7 +192,7 @@ $(".scan--directory-choose").click(() => {
 // MD5 from file
 import MD5File from "md5-file"
 
-const safe = dir => new Promise((resolve, reject) => {
+const safe = (dir, hashes) => new Promise((resolve, reject) => {
     fs.lstat(path.resolve(dir), (err, stats) => {
         if (err) reject(err)
         // If path is a directory
@@ -207,7 +207,7 @@ const safe = dir => new Promise((resolve, reject) => {
 })
 
 const scan = (dir, action) => new Promise((resolve, reject) => {
-    safe(file).then((isSafe) => {
+    safe(file, hashes).then((isSafe) => {
         if (!isSafe) {
             if (action === "remove") {
                 // Delete the file
@@ -231,157 +231,193 @@ const scan = (dir, action) => new Promise((resolve, reject) => {
     })
 })
 
-// Root directory
-// const watchDir = path.parse(process.cwd()).root
+import util from 'util'
+import {
+    EventEmitter
+} from 'events'
 
-// Home directory
-const watchDir = require('os').homedir()
+class update extends EventEmitter {
+    constructor(hashes, lastmodified) {
 
-$(".scan--directory").get(0).MDCTextField.value = watchDir
+        const self = this
 
-let total = 0
-let done = 0
+        // Download latest commit date of hash list
+        request(requestParams("https://api.github.com/repos/Richienb/virusshare-hashes/commits/master", true), (err, _, body) => {
+            if (err) self.emit("error", err)
 
-// If scan start triggered
-$(".scan--start").click(() => {
-    // Switch to scanning tab
-    app.setActiveTab('scanning')
+            // Write date to file
+            fs.writeFile(lastmodified, body.commit.author.date, () => {})
+        })
 
-    db.getItem("recursive-scan").then((recursive) => {
-        if (recursive) {
-            db.getItem("regex-matching").then((regex) => {
-                require("glob")(path.join($(".scan--directory").get(0).MDCTextField.value, regex ? regex : "/**/*"), (err, files) => {
-                    if (err) snackBarMessage(`An error occurred: ${err}`)
-
-                    $(".scanning--progress").get(0).MDCLinearProgress.determinate = true
-
-                    // Start progressbar
-                    total = files.length
-
-                    files.forEach((file) => {
-                        // If the MD5 hash is in the list
-                        scan(file, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {
-                            done++
-                            $(".scanning--progress").get(0).MDCLinearProgress.value = done / total
-                        }, (err) => {
-                            snackBarMessage(`A scanning error occurred: {err}`)
-                        })
-                    })
-                })
+        // Download hashlist
+        rprog(request(requestParams("https://media.githubusercontent.com/media/Richienb/virusshare-hashes/master/virushashes.txt")))
+            .on('error', (err) => {
+                self.emit("error", err)
             })
-        } else {
-            fs.readdir(path.resolve($(".scan--directory").get(0).MDCTextField.value), (err, files) => {
-                if (err) snackBarMessage(`An error occurred: ${err}`)
-
-                $(".scanning--progress").get(0).MDCLinearProgress.determinate = true
-
-                // Start progressbar
-                total = files.length
-
-                // For each file
-                files.forEach((file) => {
-                    // If the MD5 hash is in the list
-                    scan(file, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {
-                        done++
-                        $(".scanning--progress").get(0).MDCLinearProgress.value = done / total
-                    }, (err) => {
-                        snackBarMessage(`A scanning error occurred: {err}`)
-                    })
-                })
+            .on("progress", (state) => {
+                self.emit("progress", state.size.transferred, state.size.total)
             })
-        }
-    })
-})
-
-// Settings manager
-const manageSettings = (el, name) => {
-    if (el.hasClass("mdc-select")) {
-        const mdcSelect = el.get(0).MDCSelect.value
-        db.getItem(name).then((content) => {
-            if (content) mdcSelect.value = content
-        })
-        mdcSelect.listen('MDCSelect:change', () => {
-            db.setItem(name, mdcSelect.value)
-        })
-    } else if (el.hasClass("mdc-text-field")) {
-        const mdcTextField = el
-        db.getItem(name).then((content) => {
-            if (content) mdcTextField.get(0).MDCTextField.value = content
-        })
-        mdcTextField.find("input").on("input", () => {
-            db.setItem(name, mdcTextField.get(0).MDCTextField.value)
-        })
-    } else if (el.hasClass("mdc-switch")) {
-        const mdcSwitch = el
-        db.getItem(name).then((content) => {
-            if (content) mdcSwitch.get(0).MDCSwitch.checked = content
-        })
-        mdcSwitch.find(".mdc-switch__native-control").on('change', () => {
-            db.setItem(name, mdcSwitch.get(0).MDCSwitch.checked)
-        })
-    } else {
-        snackBarMessage(`Error syncronising ${name}.`)
+            .on("end", () => {
+                progressbar.stop()
+                self.emit("end", station)
+            })
+            .pipe(fs.createWriteStream(hashes))
     }
 }
 
-manageSettings($(".settings--update-behaviour"), "update-behaviour")
-manageSettings($(".settings--regex-matching"), "regex-matching")
-manageSettings($(".settings--rtp"), "rtp")
-manageSettings($(".settings--recursive-scan"), "recursive-scan")
-manageSettings($(".settings--threat-handling"), "threat-handling")
 
-import chokidar from 'chokidar'
+const update = (dir) => new Promise((resolve, reject) => {
 
-let watcher
+        }
 
-$(".settings--rtp").find(".mdc-switch__native-control").on('change', () => {
-    if ($(".settings--rtp").get(0).MDCSwitch.checked) {
-        watcher = chokidar.watch(watchDir, {
-            persistent: true
+
+        // Root directory
+        // const watchDir = path.parse(process.cwd()).root
+
+        // Home directory
+        const watchDir = require('os').homedir()
+
+        $(".scan--directory").get(0).MDCTextField.value = watchDir
+
+        let total = 0
+        let done = 0
+
+        // If scan start triggered
+        $(".scan--start").click(() => {
+            // Switch to scanning tab
+            app.setActiveTab('scanning')
+
+            db.getItem("recursive-scan").then((recursive) => {
+                if (recursive) {
+                    db.getItem("regex-matching").then((regex) => {
+                        require("glob")(path.join($(".scan--directory").get(0).MDCTextField.value, regex ? regex : "/**/*"), (err, files) => {
+                            if (err) snackBarMessage(`An error occurred: ${err}`)
+
+                            $(".scanning--progress").get(0).MDCLinearProgress.determinate = true
+
+                            // Start progressbar
+                            total = files.length
+
+                            files.forEach((file) => {
+                                // If the MD5 hash is in the list
+                                scan(file, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {
+                                    done++
+                                    $(".scanning--progress").get(0).MDCLinearProgress.value = done / total
+                                }, (err) => {
+                                    snackBarMessage(`A scanning error occurred: {err}`)
+                                })
+                            })
+                        })
+                    })
+                } else {
+                    fs.readdir(path.resolve($(".scan--directory").get(0).MDCTextField.value), (err, files) => {
+                        if (err) snackBarMessage(`An error occurred: ${err}`)
+
+                        $(".scanning--progress").get(0).MDCLinearProgress.determinate = true
+
+                        // Start progressbar
+                        total = files.length
+
+                        // For each file
+                        files.forEach((file) => {
+                            // If the MD5 hash is in the list
+                            scan(file, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {
+                                done++
+                                $(".scanning--progress").get(0).MDCLinearProgress.value = done / total
+                            }, (err) => {
+                                snackBarMessage(`A scanning error occurred: {err}`)
+                            })
+                        })
+                    })
+                }
+            })
         })
 
-        watcher
-            .on('add', dir => {
-                console.log('File', dir, 'has been added')
-            })
-            .on('change', dir => {
-                console.log('File', dir, 'has been changed')
-            })
-            .on('error', err => {
-                if (err.code = "EPERM") {
-                    console.warn(`Not enough permissions provided to watch a directory. Please run ROS AV as an administrator (${err.message})`)
-                } else {
-                    snackBarMessage(`An real time protection error occurred: ${err}`)
-                }
-            })
-    } else {
-        if (watcher) watcher.close()
-    }
-})
-
-$(".settings--rtp").find(".mdc-switch__native-control").trigger("change")
-
-// Execute plugins
-fs.readdir(path.join(storage, "plugins"), (err, items) => {
-    if (err) {
-        snackBarMessage(`Failed to load plugins because ${err}`)
-    }
-    items.forEach((dir) => {
-        if (dir.endsWith(".js")) {
-            fs.readFile(path.join(storage, "plugins", dir), 'utf8', (err, contents) => {
-                if (err) {
-                    snackBarMessage(`Failed to load ${dir} because ${err}`)
-                } else {
-                    (() => {
-                        try {
-                            eval(contents)
-                        } catch (err) {
-                            snackBarMessage(`Failed to load ${dir} because ${err}`)
-                        }
-                    })()
-                    snackBarMessage(`Successfully loaded ${dir}`)
-                }
-            })
+        // Settings manager
+        const manageSettings = (el, name) => {
+            if (el.hasClass("mdc-select")) {
+                const mdcSelect = el.get(0).MDCSelect
+                db.getItem(name).then((content) => {
+                    if (content) mdcSelect.value = content
+                })
+                mdcSelect.listen('MDCSelect:change', () => {
+                    db.setItem(name, mdcSelect.value)
+                })
+            } else if (el.hasClass("mdc-text-field")) {
+                const mdcTextField = el
+                db.getItem(name).then((content) => {
+                    if (content) mdcTextField.get(0).MDCTextField.value = content
+                })
+                mdcTextField.find("input").on("input", () => {
+                    db.setItem(name, mdcTextField.get(0).MDCTextField.value)
+                })
+            } else if (el.hasClass("mdc-switch")) {
+                const mdcSwitch = el
+                db.getItem(name).then((content) => {
+                    if (content) mdcSwitch.get(0).MDCSwitch.checked = content
+                })
+                mdcSwitch.find(".mdc-switch__native-control").on('change', () => {
+                    db.setItem(name, mdcSwitch.get(0).MDCSwitch.checked)
+                })
+            } else {
+                snackBarMessage(`Error syncronising ${name}.`)
+            }
         }
-    })
-})
+
+        manageSettings($(".settings--update-behaviour"), "update-behaviour") manageSettings($(".settings--regex-matching"), "regex-matching") manageSettings($(".settings--rtp"), "rtp") manageSettings($(".settings--recursive-scan"), "recursive-scan") manageSettings($(".settings--threat-handling"), "threat-handling")
+
+        import chokidar from 'chokidar'
+
+        let watcher
+
+        $(".settings--rtp").find(".mdc-switch__native-control").on('change', () => {
+            if ($(".settings--rtp").get(0).MDCSwitch.checked) {
+                watcher = chokidar.watch(watchDir, {
+                    persistent: true
+                })
+
+                watcher
+                    .on('add', dir => {
+                        console.log('File', dir, 'has been added')
+                    })
+                    .on('change', dir => {
+                        console.log('File', dir, 'has been changed')
+                    })
+                    .on('error', err => {
+                        if (err.code = "EPERM") {
+                            console.warn(`Not enough permissions provided to watch a directory. Please run ROS AV as an administrator (${err.message})`)
+                        } else {
+                            snackBarMessage(`An real time protection error occurred: ${err}`)
+                        }
+                    })
+            } else {
+                if (watcher) watcher.close()
+            }
+        })
+
+        $(".settings--rtp").find(".mdc-switch__native-control").trigger("change")
+
+        // Execute plugins
+        fs.readdir(path.join(storage, "plugins"), (err, items) => {
+            if (err) {
+                snackBarMessage(`Failed to load plugins because ${err}`)
+            }
+            items.forEach((dir) => {
+                if (dir.endsWith(".js")) {
+                    fs.readFile(path.join(storage, "plugins", dir), 'utf8', (err, contents) => {
+                        if (err) {
+                            snackBarMessage(`Failed to load ${dir} because ${err}`)
+                        } else {
+                            (() => {
+                                try {
+                                    eval(contents)
+                                } catch (err) {
+                                    snackBarMessage(`Failed to load ${dir} because ${err}`)
+                                }
+                            })()
+                            snackBarMessage(`Successfully loaded ${dir}`)
+                        }
+                    })
+                }
+            })
+        })
