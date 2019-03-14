@@ -22,6 +22,7 @@
         "bloomfilter": "^0.0.18",
         "chokidar": "^2.1.2",
         "dayjs": "^1.8.9",
+        "downloads-folder": "^1.0.1",
         "electron": "^4.0.7",
         "glob": "^7.1.3",
         "graceful-fs": "^4.1.15",

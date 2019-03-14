@@ -6,7 +6,7 @@ const {
     BrowserWindow
 } = require('electron')
 
-app.commandLine.appendSwitch('--autoplay-policy','no-user-gesture-required')
+app.commandLine.appendSwitch('--autoplay-policy', 'no-user-gesture-required')
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -23,7 +23,10 @@ app.on('ready', () => {
         icon: 'icon.ico',
         frame: false,
         resizable: false,
-        contextIsolation: true
+        contextIsolation: true,
+        webPreferences: {
+            nodeIntegration: true
+        }
     })
 
     mainWindow.on('minimize', event => {
