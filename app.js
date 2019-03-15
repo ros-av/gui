@@ -1,3 +1,5 @@
+import Vue from "vue/dist/vue.esm.js"
+
 const app = new Vue({
     el: ".app",
     data: {
@@ -83,8 +85,19 @@ const list = mdc.list.MDCList.attachTo($(".main--drawer-content").get(0))
 // Fix focusing
 list.wrapFocus = true
 
-// Automatically initialise ripples
-mdc.autoInit()
+// Import MDC Ripple
+// import {
+//     MDCRipple
+// } from "@material/ripple/index"
+//
+// // Import MDC Auto Init
+// import mdcAutoInit from "@material/auto-init/index"
+//
+// // Register MDC Ripple as an automatically initialisable object
+// mdcAutoInit.register("MDCRipple", MDCRipple)
+//
+// // Automatically initialise the objects
+// mdcAutoInit()
 
 // For each icon button with ripples
 $(".mdc-icon-button[data-mdc-auto-init='MDCRipple']").each((_, {
@@ -182,11 +195,7 @@ $(".scan--directory-choose").click(() => {
     $(".scan--directory-helper").click()
 })
 
-// // External file requester
-// import request from "request"
-// import rprog from "request-progress"
-//
-// // Time parser
+// Time parser
 // import dayjs from "dayjs"
 
 // MD5 from file
@@ -230,10 +239,13 @@ const scan = (dir, action) => new Promise((resolve, reject) => {
     })
 })
 
-import util from 'util'
 import {
     EventEmitter
 } from 'events'
+
+// External file requester
+import request from "request"
+import rprog from "request-progress"
 
 class update extends EventEmitter {
     constructor(hashes, lastmodified) {
@@ -263,10 +275,47 @@ class update extends EventEmitter {
                 self.emit("progress", size.transferred, size.total)
             })
             .on("end", () => {
-                progressbar.stop()
                 self.emit("end", station)
             })
             .pipe(fs.createWriteStream(hashes))
+    }
+}
+
+class checkupdate extends EventEmitter {
+    constructor(lastmodified) {
+
+        super()
+
+        const self = this
+
+        // Request the GitHub API rate limit
+        request(requestParams("https://api.github.com/rate_limit", true), (err, _, body) => {
+            if (err) self.emit("error", err)
+
+            // Check the quota limit
+            if (body.resources.core.remaining === 0) {
+                // If no API quota remaining
+                self.emit("noquota", body.resources.core.reset)
+            } else {
+                // Check for the latest commit
+                request(requestParams("https://api.github.com/repos/Richienb/virusshare-hashes/commits/master", true), (err, _, body) => {
+                    if (err) self.emit("error", err)
+
+                    // Get download date of hashlist
+                    const current = dayjs(lastmodified)
+
+                    // Get latest commit date of hashlist
+                    const now = dayjs(body.commit.author.date, "YYYY-MM-DDTHH:MM:SSZ")
+
+                    // Check if current is older than now
+                    if (current.isBefore(now)) {
+                        self.emit("noquota", body.resources.core.reset)
+                    } else {
+                        self.emit("uptodate")
+                    }
+                })
+            }
+        })
 
     }
 }

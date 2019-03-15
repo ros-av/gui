@@ -22,11 +22,7 @@ app.on('ready', () => {
         height: 680,
         icon: 'icon.ico',
         frame: false,
-        resizable: false,
-        contextIsolation: true,
-        webPreferences: {
-            nodeIntegration: true
-        }
+        resizable: false
     })
 
     mainWindow.on('minimize', event => {
