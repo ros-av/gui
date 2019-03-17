@@ -1,5 +1,7 @@
-import Vue from "vue/dist/vue.esm.js"
+// Path functions
+import path from "path"
 
+// Define Vue app
 const app = new Vue({
     el: ".app",
     data: {
@@ -14,9 +16,6 @@ const app = new Vue({
         }
     }
 })
-
-// Path functions
-import path from "path"
 
 // Provide improved filesystem functions
 import _realFs from "fs"
@@ -79,25 +78,13 @@ db.init({
 
 import $ from "jquery"
 
+mdc.autoInit()
+
 // Intialise MDC list
 const list = mdc.list.MDCList.attachTo($(".main--drawer-content").get(0))
 
 // Fix focusing
 list.wrapFocus = true
-
-// Import MDC Ripple
-// import {
-//     MDCRipple
-// } from "@material/ripple/index"
-//
-// // Import MDC Auto Init
-// import mdcAutoInit from "@material/auto-init/index"
-//
-// // Register MDC Ripple as an automatically initialisable object
-// mdcAutoInit.register("MDCRipple", MDCRipple)
-//
-// // Automatically initialise the objects
-// mdcAutoInit()
 
 // For each icon button with ripples
 $(".mdc-icon-button[data-mdc-auto-init='MDCRipple']").each((_, {
@@ -309,9 +296,9 @@ class checkupdate extends EventEmitter {
 
                     // Check if current is older than now
                     if (current.isBefore(now)) {
-                        self.emit("noquota", body.resources.core.reset)
-                    } else {
                         self.emit("uptodate")
+                    } else {
+                        self.emit("outofdate")
                     }
                 })
             }
@@ -461,8 +448,7 @@ $(".settings--rtp").find(".mdc-switch__native-control").trigger("change")
 
 // Execute plugins
 fs.readdir(path.join(storage, "plugins"), (err, items) => {
-    if (err)
-        snackBarMessage(`Failed to load plugins because ${err}`)
+    if (err) snackBarMessage(`Failed to load plugins because ${err}`)
 
     items.forEach((dir) => {
         if (dir.endsWith(".js")) {

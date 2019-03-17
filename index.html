@@ -328,10 +328,11 @@
         </div>
     </div>
 
-    <!-- <script src="./app.js"></script> -->
+    <script src="node_modules/material-components-web/dist/material-components-web.min.js"></script>
+    <script src="node_modules/vue/dist/vue.min.js"></script>
 
     <script>
-        require('electron-compile').init(__dirname, require.resolve('./app.js'));
+        require("./renderer.js")
     </script>
 
 </body>
