@@ -7,11 +7,19 @@
         "rosav-gui": "electron"
     },
     "scripts": {
-        "start": "electron ."
+        "start": "electron .",
+        "build": "electron-builder"
     },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/ros-av/gui.git"
+    },
+    "build": {
+        "productName": "ROS AV",
+        "appId": "av.ros",
+        "mac": {
+          "category": "av.ros.security.application"
+        }
     },
     "author": "Richie Bendall <richiebendall@gmail.com>",
     "license": "MIT",
@@ -24,7 +32,6 @@
         "chokidar": "^2.1.2",
         "dayjs": "^1.8.9",
         "downloads-folder": "^1.0.1",
-        "electron": "^4.1.0",
         "glob": "^7.1.3",
         "graceful-fs": "^4.1.15",
         "jquery": "^3.3.1",
@@ -39,7 +46,10 @@
         "temp-dir": "^1.0.0",
         "vue": "^2.6.8"
     },
-    "devDependencies": {},
+    "devDependencies": {
+        "electron": "^4.1.0",
+        "electron-builder": "^20.39.0"
+    },
     "keywords": [
         "av",
         "antivirus",
