@@ -123,40 +123,42 @@ const countFileLines = filePath => new Promise((resolve, reject) => {
         }).on("error", reject)
 })
 
-// Line by line reader
-import LineByLineReader from "line-by-line"
+const loadHashes = () => {
+    // Line by line reader
+    import LineByLineReader from "line-by-line"
 
-countFileLines(path.join(storage, "hashlist.txt")).then((lines) => {
-    $(".main--progress").get(0).MDCLinearProgress.determinate = true
+    countFileLines(path.join(storage, "hashlist.txt")).then((lines) => {
+        $(".main--progress").get(0).MDCLinearProgress.determinate = true
 
-    let done = 0
+        let done = 0
 
-    // Line reader
-    const hlr = new LineByLineReader(path.join(storage, "hashlist.txt"), {
-        encoding: "utf8",
-        skipEmptyLines: true
+        // Line reader
+        const hlr = new LineByLineReader(path.join(storage, "hashlist.txt"), {
+            encoding: "utf8",
+            skipEmptyLines: true
+        })
+
+        // Line reader error
+        hlr.on("error", (err) => {
+            if (err) snackBarMessage(`An error occurred: ${err}`)
+        })
+
+        // New line from line reader
+        hlr.on("line", (line) => {
+            done++
+            $(".main--progress").get(0).MDCLinearProgress.progress = done / lines
+            hashes.add(line)
+        })
+
+        // Line reader finished
+        hlr.on("end", () => {
+            $(".main--progress").get(0).MDCLinearProgress.close()
+            $(".scan--loading").hide()
+            $(".scan--start-container").show()
+            hashesLoaded = true
+        })
     })
-
-    // Line reader error
-    hlr.on("error", (err) => {
-        if (err) snackBarMessage(`An error occurred: ${err}`)
-    })
-
-    // New line from line reader
-    hlr.on("line", (line) => {
-        done++
-        $(".main--progress").get(0).MDCLinearProgress.progress = done / lines
-        hashes.add(line)
-    })
-
-    // Line reader finished
-    hlr.on("end", () => {
-        $(".main--progress").get(0).MDCLinearProgress.close()
-        $(".scan--loading").hide()
-        $(".scan--start-container").show()
-        hashesLoaded = true
-    })
-})
+}
 
 // Request parameters
 const requestParams = (url, json = false) => ({
@@ -268,44 +270,48 @@ class update extends EventEmitter {
     }
 }
 
-class checkupdate extends EventEmitter {
-    constructor(lastmodified) {
+const checkupdate = lastmodified => new Promise((resolve, reject) => {
+    // Request the GitHub API rate limit
+    request(requestParams("https://api.github.com/rate_limit", true), (err, _, body) => {
+        if (err) reject("error", err)
 
-        super()
+        // Check the quota limit
+        if (body.resources.core.remaining === 0) {
+            // If no API quota remaining
+            resolve({
+                quota: false,
+                reset: body.resources.core.reset,
+                outofdate: false
+            })
+        } else {
+            // Check for the latest commit
+            request(requestParams("https://api.github.com/repos/Richienb/virusshare-hashes/commits/master", true), (err, _, body) => {
+                if (err) reject("error", err)
 
-        const self = this
+                // Get download date of hashlist
+                const current = dayjs(lastmodified)
 
-        // Request the GitHub API rate limit
-        request(requestParams("https://api.github.com/rate_limit", true), (err, _, body) => {
-            if (err) self.emit("error", err)
+                // Get latest commit date of hashlist
+                const now = dayjs(body.commit.author.date, "YYYY-MM-DDTHH:MM:SSZ")
 
-            // Check the quota limit
-            if (body.resources.core.remaining === 0) {
-                // If no API quota remaining
-                self.emit("noquota", body.resources.core.reset)
-            } else {
-                // Check for the latest commit
-                request(requestParams("https://api.github.com/repos/Richienb/virusshare-hashes/commits/master", true), (err, _, body) => {
-                    if (err) self.emit("error", err)
-
-                    // Get download date of hashlist
-                    const current = dayjs(lastmodified)
-
-                    // Get latest commit date of hashlist
-                    const now = dayjs(body.commit.author.date, "YYYY-MM-DDTHH:MM:SSZ")
-
-                    // Check if current is older than now
-                    if (current.isBefore(now)) {
-                        self.emit("uptodate")
-                    } else {
-                        self.emit("outofdate")
-                    }
+                // Check if current is older than now
+                resolve({
+                    quota: true,
+                    reset: body.resources.core.reset,
+                    outofdate: current.isBefore(now)
                 })
-            }
-        })
+            })
+        }
+    })
+})
 
+checkupdate(path.join(storage, "scanning", "lastmodified.txt")).then((stats) => {
+    if (stats.outofdate === false) {
+        loadHashes()
+    } else {
+        update(path.join(storage, "scanning", "hashlist.txt"), path.join(storage, "scanning", "lastmodified.txt"))
     }
-}
+})
 
 // Root directory
 // const scanDir = path.parse(process.cwd()).root
