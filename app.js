@@ -29,6 +29,8 @@ import notifier from "node-notifier"
 // Attach snackbar
 const snackbar = new mdc.snackbar.MDCSnackbar($(".main--snackbar").get(0))
 
+const appIcon = process.platform === "darwin" ? path.join(__dirname, "build", "icons", "mac", "icon.icns") : path.join(__dirname, "build", "icons", "win", "icon.ico")
+
 // Display snackbar message
 const snackBarMessage = (message, volume = 0.0) => {
     snackbar.close()
@@ -37,15 +39,17 @@ const snackBarMessage = (message, volume = 0.0) => {
     notifier.notify({
         title: "ROS AV",
         message,
-        icon: path.join(__dirname, "icon.ico"),
+        icon: appIcon,
         sound: false
     })
-    $(".ping").get(0).volume = volume
-    $(".ping").get(0).play()
+    if (volume > 0.0) {
+        $(".ping").get(0).volume = volume
+        $(".ping").get(0).play()
+    }
 }
 
 const populateDirectory = (dir) => {
-    fs.access(dir, (err) => {
+    fs.access(dir, fs.constants.F_OK, (err) => {
         if (err) {
             fs.mkdir(dir, {
                 recursive: true
@@ -56,12 +60,13 @@ const populateDirectory = (dir) => {
     })
 }
 
-// Define storage path
-const storage = path.join(require("temp-dir"), "rosav")
+// App data storage path
+import electron from 'electron'
 
-// New storage path (not ready to migrate yet)
-// const storage = require("app-cache-dir")("rosav")
+// Set storage location
+const storage = path.join((electron.app || electron.remote.app).getPath("appData"), "rosav")
 
+// Populate storage locations
 populateDirectory(storage)
 populateDirectory(path.join(storage, "scanning"))
 populateDirectory(path.join(storage, "quarantine"))
@@ -73,12 +78,12 @@ import db from "node-persist"
 
 // Initialise storage
 db.init({
-    dir: path.join(storage, "db")
+    dir: path.join(path.join(storage, "settings"))
 })
 
-import $ from "jquery"
-
 mdc.autoInit()
+
+import $ from "jquery"
 
 // Intialise MDC list
 const list = mdc.list.MDCList.attachTo($(".main--drawer-content").get(0))
@@ -123,17 +128,18 @@ const countFileLines = filePath => new Promise((resolve, reject) => {
         }).on("error", reject)
 })
 
-const loadHashes = () => {
-    // Line by line reader
-    import LineByLineReader from "line-by-line"
+// Line by line reader
+import LineByLineReader from "line-by-line"
 
-    countFileLines(path.join(storage, "hashlist.txt")).then((lines) => {
+// Hashes loader
+const loadHashes = () => {
+    countFileLines(path.join(storage, "scanning", "hashlist.txt")).then((lines) => {
         $(".main--progress").get(0).MDCLinearProgress.determinate = true
 
         let done = 0
 
         // Line reader
-        const hlr = new LineByLineReader(path.join(storage, "hashlist.txt"), {
+        const hlr = new LineByLineReader(path.join(storage, "scanning", "hashlist.txt"), {
             encoding: "utf8",
             skipEmptyLines: true
         })
@@ -185,7 +191,7 @@ $(".scan--directory-choose").click(() => {
 })
 
 // Time parser
-// import dayjs from "dayjs"
+import dayjs from "dayjs"
 
 // MD5 from file
 import MD5File from "md5-file"
@@ -236,80 +242,99 @@ import {
 import request from "request"
 import rprog from "request-progress"
 
-class update extends EventEmitter {
-    constructor(hashes, lastmodified) {
+const update = (hashes, lastmodified) => {
+    const self = new EventEmitter()
 
-        super()
+    // Download latest commit date of hash list
+    request(requestParams("https://api.github.com/repos/Richienb/virusshare-hashes/commits/master", true), (err, _, {
+        commit
+    }) => {
+        if (err) self.emit("error", err)
 
-        const self = this
+        // Write date to file
+        fs.writeFile(lastmodified, commit.author.date, () => {})
+    })
 
-        // Download latest commit date of hash list
-        request(requestParams("https://api.github.com/repos/Richienb/virusshare-hashes/commits/master", true), (err, _, {
-            commit
-        }) => {
-            if (err) self.emit("error", err)
-
-            // Write date to file
-            fs.writeFile(lastmodified, commit.author.date, () => {})
+    // Download hashlist
+    rprog(request(requestParams("https://media.githubusercontent.com/media/Richienb/virusshare-hashes/master/virushashes.txt")))
+        .on("error", (err) => {
+            self.emit("error", err)
         })
+        .on("progress", ({
+            size
+        }) => {
+            self.emit("progress", size.transferred, size.total)
+        })
+        .on("end", () => {
+            self.emit("end")
+        })
+        .pipe(fs.createWriteStream(hashes))
 
-        // Download hashlist
-        rprog(request(requestParams("https://media.githubusercontent.com/media/Richienb/virusshare-hashes/master/virushashes.txt")))
-            .on("error", (err) => {
-                self.emit("error", err)
-            })
-            .on("progress", ({
-                size
-            }) => {
-                self.emit("progress", size.transferred, size.total)
-            })
-            .on("end", () => {
-                self.emit("end", station)
-            })
-            .pipe(fs.createWriteStream(hashes))
-    }
+    return self
 }
 
-const checkupdate = lastmodified => new Promise((resolve, reject) => {
-    // Request the GitHub API rate limit
-    request(requestParams("https://api.github.com/rate_limit", true), (err, _, body) => {
-        if (err) reject("error", err)
+const checkupdate = (hashlist, lastmodified) => new Promise((resolve, reject) => {
+    fs.access(hashlist, fs.constants.F_OK, (err) => {
+        if (err) resolve({
+            fileexists: false,
+            outofdate: true
+        })
+        // Request the GitHub API rate limit
+        request(requestParams("https://api.github.com/rate_limit", true), (err, _, {
+            resources
+        }) => {
+            if (err) reject("error", err)
 
-        // Check the quota limit
-        if (body.resources.core.remaining === 0) {
-            // If no API quota remaining
-            resolve({
-                quota: false,
-                reset: body.resources.core.reset,
-                outofdate: false
-            })
-        } else {
-            // Check for the latest commit
-            request(requestParams("https://api.github.com/repos/Richienb/virusshare-hashes/commits/master", true), (err, _, body) => {
-                if (err) reject("error", err)
-
-                // Get download date of hashlist
-                const current = dayjs(lastmodified)
-
-                // Get latest commit date of hashlist
-                const now = dayjs(body.commit.author.date, "YYYY-MM-DDTHH:MM:SSZ")
-
-                // Check if current is older than now
+            // Check the quota limit
+            if (resources.core.remaining === 0) {
+                // If no API quota remaining
                 resolve({
-                    quota: true,
-                    reset: body.resources.core.reset,
-                    outofdate: current.isBefore(now)
+                    quota: false,
+                    fileexists: true,
+                    reset: resources.core.reset,
+                    outofdate: false
                 })
-            })
-        }
+            } else {
+                // Check for the latest commit
+                request(requestParams("https://api.github.com/repos/Richienb/virusshare-hashes/commits/master", true), (err, _, {
+                    commit
+                }) => {
+                    if (err) reject("error", err)
+
+                    // Get download date of hashlist
+                    const current = dayjs(lastmodified)
+
+                    // Get latest commit date of hashlist
+                    const now = dayjs(commit.author.date, "YYYY-MM-DDTHH:MM:SSZ")
+
+                    // Check if current is older than now
+                    resolve({
+                        quota: true,
+                        fileexists: true,
+                        reset: resources.core.reset,
+                        outofdate: current.isBefore(now)
+                    })
+                })
+            }
+        })
     })
 })
 
-checkupdate(path.join(storage, "scanning", "lastmodified.txt")).then((stats) => {
-    if (stats.outofdate === false) {
+checkupdate(path.join(storage, "scanning", "hashlist.txt"), path.join(storage, "scanning", "lastmodified.txt")).then(({
+    outofdate
+}) => {
+    if (outofdate === false) {
         loadHashes()
     } else {
-        update(path.join(storage, "scanning", "hashlist.txt"), path.join(storage, "scanning", "lastmodified.txt"))
+        update(path.join(storage, "scanning", "hashlist.txt"), path.join(storage, "scanning", "lastmodified.txt")).on("progress", (done, total) => {
+            // Make progress bar determinate
+            $(".scanning--progress").get(0).MDCLinearProgress.determinate = true
+
+            // Make progress bar determinate
+            $(".scanning--progress").get(0).MDCLinearProgress.value = done / total
+        }).on("end", () => {
+            loadHashes()
+        })
     }
 })
 
@@ -329,6 +354,11 @@ let done = 0
 
 // If scan start triggered
 $(".scan--start").click(() => {
+    if (!hashesLoaded) {
+        snackBarMessage("Hashes not fully loaded.")
+        return
+    }
+
     // Switch to scanning tab
     app.setActiveTab("scanning")
 
@@ -346,7 +376,7 @@ $(".scan--start").click(() => {
 
                     files.forEach((file) => {
                         // If the MD5 hash is in the list
-                        scan(file, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {
+                        if (hashesLoaded) scan(file, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {
                             done++
                             $(".scanning--progress").get(0).MDCLinearProgress.value = done / total
                         }, (err) => {
@@ -367,7 +397,7 @@ $(".scan--start").click(() => {
                 // For each file
                 files.forEach((file) => {
                     // If the MD5 hash is in the list
-                    scan(file, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {
+                    if (hashesLoaded) scan(file, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {
                         done++
                         $(".scanning--progress").get(0).MDCLinearProgress.value = done / total
                     }, (err) => {
@@ -429,12 +459,12 @@ $(".settings--rtp").find(".mdc-switch__native-control").on("change", () => {
 
         watcher
             .on("add", dir => {
-                scan(dir, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {}, (err) => {
+                if (hashesLoaded) scan(dir, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {}, (err) => {
                     if (err) snackBarMessage(`A scanning error occurred: ${err}`)
                 })
             })
             .on("change", dir => {
-                scan(dir, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {}, (err) => {
+                if (hashesLoaded) scan(dir, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {}, (err) => {
                     if (err) snackBarMessage(`A scanning error occurred: ${err}`)
                 })
             })
@@ -445,9 +475,7 @@ $(".settings--rtp").find(".mdc-switch__native-control").on("change", () => {
                     snackBarMessage(`An real time protection error occurred: ${err}`)
                 }
             })
-    } else {
-        if (watcher) watcher.close()
-    }
+    } else if (watcher.close) watcher.close()
 })
 
 $(".settings--rtp").find(".mdc-switch__native-control").trigger("change")
@@ -456,19 +484,22 @@ $(".settings--rtp").find(".mdc-switch__native-control").trigger("change")
 fs.readdir(path.join(storage, "plugins"), (err, items) => {
     if (err) snackBarMessage(`Failed to load plugins because ${err}`)
 
+    // If no plugins installed
+    if (!items) return
+
     items.forEach((dir) => {
         if (dir.endsWith(".js")) {
             fs.readFile(path.join(storage, "plugins", dir), "utf8", (err, contents) => {
                 if (err) {
                     snackBarMessage(`Failed to load ${dir} because ${err}`)
                 } else {
-                    (() => {
-                        try {
+                    try {
+                        (() => {
                             eval(contents)
-                        } catch (err) {
-                            snackBarMessage(`Failed to load ${dir} because ${err}`)
-                        }
-                    })()
+                        })()
+                    } catch (err) {
+                        snackBarMessage(`Failed to load ${dir} because ${err}`)
+                    }
                     snackBarMessage(`Successfully loaded ${dir}`)
                 }
             })

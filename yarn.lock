@@ -708,13 +708,6 @@ app-builder-lib@20.39.0, app-builder-lib@~20.39.0:
     semver "^5.6.0"
     temp-file "^3.3.2"
 
-app-cache-dir@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/app-cache-dir/-/app-cache-dir-0.4.0.tgz#da7a71f0271a253e1e85a90fea89d389a435fdfc"
-  integrity sha512-n3xRlHkEniwyQeMPt+QKEfqNs4QMGr/4p1K7SVfuYc6ALXDTVYHErnQAhETEikOngCeXk3EcZQUVqcvvJOxhiQ==
-  dependencies:
-    inspect-with-kind "^1.0.2"
-
 aproba@^1.0.3:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/aproba/-/aproba-1.2.0.tgz#6802e6264efd18c790a1b0d517f0f2627bf2c94a"
@@ -2459,13 +2452,6 @@ ini@^1.3.4, ini@~1.3.0:
   resolved "https://registry.yarnpkg.com/ini/-/ini-1.3.5.tgz#eee25f56db1c9ec6085e0c22778083f596abf927"
   integrity sha512-RZY5huIKCMRWDUqZlEi72f/lmXKMvuszcMBduliQ3nnWbx9X/ZBQO7DijMEYS9EhHBb2qacRUMtC7svLwe0lcw==
 
-inspect-with-kind@^1.0.2:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/inspect-with-kind/-/inspect-with-kind-1.0.5.tgz#fce151d4ce89722c82ca8e9860bb96f9167c316c"
-  integrity sha512-MAQUJuIo7Xqk8EVNP+6d3CKq9c80hi4tjIbIAT6lmGW9W6WzlHiu9PS8uSuUYU+Do+j1baiFp3H25XEVxDIG2g==
-  dependencies:
-    kind-of "^6.0.2"
-
 invariant@^2.2.2:
   version "2.2.4"
   resolved "https://registry.yarnpkg.com/invariant/-/invariant-2.2.4.tgz#610f3c92c9359ce1db616e538008d23ff35158e6"
@@ -4156,11 +4142,6 @@ tar@^4:
     mkdirp "^0.5.0"
     safe-buffer "^5.1.2"
     yallist "^3.0.2"
-
-temp-dir@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/temp-dir/-/temp-dir-1.0.0.tgz#0a7c0ea26d3a39afa7e0ebea9c1fc0bc4daa011d"
-  integrity sha1-CnwOom06Oa+n4OvqnB/AvE2qAR0=
 
 temp-file@^3.3.2:
   version "3.3.2"

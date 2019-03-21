@@ -18,14 +18,13 @@
         "productName": "ROS AV",
         "appId": "av.ros",
         "mac": {
-          "category": "av.ros.security.application"
+            "category": "av.ros.security.application"
         }
     },
     "author": "Richie Bendall <richiebendall@gmail.com>",
     "license": "MIT",
     "dependencies": {
         "@babel/core": "^7.3.4",
-        "app-cache-dir": "^0.4.0",
         "babel-preset-env": "^1.7.0",
         "babel-register": "^6.26.0",
         "bloomfilter": "^0.0.18",
@@ -43,7 +42,6 @@
         "normalize.css": "^8.0.1",
         "request": "^2.88.0",
         "request-progress": "^3.0.0",
-        "temp-dir": "^1.0.0",
         "vue": "^2.6.8"
     },
     "devDependencies": {
