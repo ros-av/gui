@@ -1,6 +1,3 @@
-// Path functions
-import path from "path"
-
 // Define Vue app
 const app = new Vue({
     el: ".app",
@@ -17,14 +14,29 @@ const app = new Vue({
     }
 })
 
+// Auto init MDC elements
+mdc.autoInit()
+
+// Jquery
+const $ = require("jquery")
+
+// For each icon button with ripples
+$(".mdc-icon-button[data-mdc-auto-init='MDCRipple']").each((_, {
+    MDCRipple
+}) => {
+
+    // Fix ripples
+    MDCRipple.unbounded = true
+})
+
 // Provide improved filesystem functions
-import _realFs from "fs"
-import _gracefulFs from "graceful-fs"
-_gracefulFs.gracefulify(_realFs)
-import fs from "graceful-fs"
+const fs = require('graceful-fs').gracefulify(require('fs'))
 
 // Notifications service
-import notifier from "node-notifier"
+const notifier = require("node-notifier")
+
+// Path functions
+const path = require("path")
 
 // Attach snackbar
 const snackbar = new mdc.snackbar.MDCSnackbar($(".main--snackbar").get(0))
@@ -61,10 +73,13 @@ const populateDirectory = (dir) => {
 }
 
 // App data storage path
-import electron from 'electron'
+const electron = require("electron")
 
 // Set storage location
 const storage = path.join((electron.app || electron.remote.app).getPath("appData"), "rosav")
+
+// Set temporary storage location
+const tempdir = path.join(require('temp-dir'), "rosav")
 
 // Populate storage locations
 populateDirectory(storage)
@@ -74,109 +89,33 @@ populateDirectory(path.join(storage, "reports"))
 populateDirectory(path.join(storage, "plugins"))
 
 // Settings storage
-import db from "node-persist"
+const db = require("node-persist")
 
 // Initialise storage
 db.init({
     dir: path.join(path.join(storage, "settings"))
 })
 
-mdc.autoInit()
-
-import $ from "jquery"
-
-// Intialise MDC list
-const list = mdc.list.MDCList.attachTo($(".main--drawer-content").get(0))
-
-// Fix focusing
-list.wrapFocus = true
-
-// For each icon button with ripples
-$(".mdc-icon-button[data-mdc-auto-init='MDCRipple']").each((_, {
-    MDCRipple
-}) => {
-    // Fix ripples
-    MDCRipple.unbounded = true
-})
-
 // Bloom filter functionality
-import {
-    BloomFilter
-} from "bloomfilter"
+const Bloomfilter = require('node-bloomfilter')
 
-// Hash list
-let hashes = new BloomFilter(
-    1592401693, // Number of bits to allocate
-    33 // Number of hash functions
-)
+// // Hash list
+// let hashes = new BloomFilter(
+//     1592401693, // Number of bits to allocate
+//     33 // Number of hash functions
+// )
 
 // If hashes have loaded
 let hashesLoaded = false
 
-const countFileLines = filePath => new Promise((resolve, reject) => {
-    let lineCount = 0
-    fs.createReadStream(filePath)
-        .on("data", (buffer) => {
-            let idx = -1
-            lineCount--
-            do {
-                idx = buffer.indexOf(10, idx + 1)
-                lineCount++
-            } while (idx !== -1)
-        }).on("end", () => {
-            resolve(lineCount)
-        }).on("error", reject)
-})
-
-// Line by line reader
-import LineByLineReader from "line-by-line"
-
 // Hashes loader
-const loadHashes = () => {
-    countFileLines(path.join(storage, "scanning", "hashlist.txt")).then((lines) => {
-        $(".main--progress").get(0).MDCLinearProgress.determinate = true
-
-        let done = 0
-
-        // Line reader
-        const hlr = new LineByLineReader(path.join(storage, "scanning", "hashlist.txt"), {
-            encoding: "utf8",
-            skipEmptyLines: true
-        })
-
-        // Line reader error
-        hlr.on("error", (err) => {
-            if (err) snackBarMessage(`An error occurred: ${err}`)
-        })
-
-        // New line from line reader
-        hlr.on("line", (line) => {
-            done++
-            $(".main--progress").get(0).MDCLinearProgress.progress = done / lines
-            hashes.add(line)
-        })
-
-        // Line reader finished
-        hlr.on("end", () => {
-            $(".main--progress").get(0).MDCLinearProgress.close()
-            $(".scan--loading").hide()
-            $(".scan--start-container").show()
-            hashesLoaded = true
-        })
-    })
-}
-
-// Request parameters
-const requestParams = (url, json = false) => ({
-    url,
-    json,
-    gzip: true,
-    method: "GET",
-
-    headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0 WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3163.100 Safari/537.36"
-    }
+const loadHashes = (hashes) => new Promise(resolve => {
+    Bloomfilter.fromStream(fs.createReadStream(hashes)).then(deser => {
+        resolve(deser)
+    });
 })
+
+let hashes
 
 // When directory selected
 $(".scan--directory-helper").change(() => {
@@ -191,10 +130,10 @@ $(".scan--directory-choose").click(() => {
 })
 
 // Time parser
-import dayjs from "dayjs"
+const dayjs = require("dayjs")
 
 // MD5 from file
-import MD5File from "md5-file"
+const MD5File = require("md5-file")
 
 const safe = (dir, hashes) => new Promise((resolve, reject) => {
     fs.lstat(path.resolve(dir), (err, stats) => {
@@ -205,7 +144,7 @@ const safe = (dir, hashes) => new Promise((resolve, reject) => {
         MD5File(path.resolve(dir), (err, hash) => {
             if (err) reject(err)
             // If the hash is in the list
-            resolve(!hashes.test(hash))
+            resolve(!hashes.mightContain(hash))
         })
     })
 })
@@ -234,19 +173,54 @@ const scan = (dir, action) => new Promise((resolve, reject) => {
     })
 })
 
-import {
-    EventEmitter
-} from 'events'
+const EventEmitter = require('events')
 
 // External file requester
-import request from "request"
-import rprog from "request-progress"
+const requestTemplate = require("request")
 
-const update = (hashes, lastmodified) => {
+const userAgent = "Mozilla/5.0 (Windows NT 10.0 WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3163.100 Safari/537.36"
+const githubapi = requestTemplate.defaults({
+    json: true,
+    gzip: true,
+    method: "GET",
+    headers: {
+        "Accept": "application/vnd.github.v3+json",
+        "User-Agent": userAgent
+    }
+})
+const request = requestTemplate.defaults({
+    gzip: true,
+    method: "GET",
+    headers: {
+        "User-Agent": userAgent
+    }
+})
+
+const rprog = require("request-progress")
+
+const countFileLines = filePath => new Promise((resolve, reject) => {
+    let lineCount = 0
+    fs.createReadStream(filePath)
+        .on("data", (buffer) => {
+            let idx = -1
+            lineCount--
+            do {
+                idx = buffer.indexOf(10, idx + 1)
+                lineCount++
+            } while (idx !== -1)
+        }).on("end", () => {
+            resolve(lineCount)
+        }).on("error", reject)
+})
+
+// Line by line reader
+const LineByLineReader = require("line-by-line")
+
+const update = (hashes, lastmodified, temphashes) => {
     const self = new EventEmitter()
 
     // Download latest commit date of hash list
-    request(requestParams("https://api.github.com/repos/Richienb/virusshare-hashes/commits/master", true), (err, _, {
+    githubapi("https://api.github.com/repos/Richienb/virusshare-hashes/commits/master", (err, _, {
         commit
     }) => {
         if (err) self.emit("error", err)
@@ -256,19 +230,49 @@ const update = (hashes, lastmodified) => {
     })
 
     // Download hashlist
-    rprog(request(requestParams("https://media.githubusercontent.com/media/Richienb/virusshare-hashes/master/virushashes.txt")))
+    rprog(request("https://media.githubusercontent.com/media/Richienb/virusshare-hashes/master/virushashes.txt"))
         .on("error", (err) => {
             self.emit("error", err)
         })
         .on("progress", ({
             size
         }) => {
-            self.emit("progress", size.transferred, size.total)
+            self.emit("progress", size.transferred / size.total / 2, 1.0)
         })
         .on("end", () => {
-            self.emit("end")
+
+            countFileLines(temphashes).then((fileLines) => {
+                const hashes = BloomFilter.bestFor(
+                    fileLines, // Number of bits to allocate
+                    1e-10 // Number of hash functions (currently set at 1/1 billion)
+                )
+
+                let done = 0
+
+                // Line reader
+                const hlr = new LineByLineReader(hashlist, {
+                    encoding: "utf8",
+                    skipEmptyLines: true
+                })
+
+                // Line reader error
+                hlr.on("error", (err) => self.emit("error", err))
+
+                // New line from line reader
+                hlr.on("line", (line) => {
+                    hashes.put(line)
+                    done++
+                    self.emit("progress", done / fileLines + 0.5, 1.0)
+                })
+
+                // Line reader finished
+                hlr.on("end", () => {
+                    hashes.toStream().pipe(fs.createWriteStream(hashlist)).on('finish', () => self.emit("end"))
+                })
+            })
+
         })
-        .pipe(fs.createWriteStream(hashes))
+        .pipe(fs.createWriteStream(temphashes))
 
     return self
 }
@@ -279,8 +283,7 @@ const checkupdate = (hashlist, lastmodified) => new Promise((resolve, reject) =>
             fileexists: false,
             outofdate: true
         })
-        // Request the GitHub API rate limit
-        request(requestParams("https://api.github.com/rate_limit", true), (err, _, {
+        githubapi("https://api.github.com/rate_limit", (err, _, {
             resources
         }) => {
             if (err) reject("error", err)
@@ -296,7 +299,7 @@ const checkupdate = (hashlist, lastmodified) => new Promise((resolve, reject) =>
                 })
             } else {
                 // Check for the latest commit
-                request(requestParams("https://api.github.com/repos/Richienb/virusshare-hashes/commits/master", true), (err, _, {
+                githubapi("https://api.github.com/repos/Richienb/virusshare-hashes/commits/master", (err, _, {
                     commit
                 }) => {
                     if (err) reject("error", err)
@@ -320,20 +323,28 @@ const checkupdate = (hashlist, lastmodified) => new Promise((resolve, reject) =>
     })
 })
 
-checkupdate(path.join(storage, "scanning", "hashlist.txt"), path.join(storage, "scanning", "lastmodified.txt")).then(({
+checkupdate(path.join(storage, "scanning", "hashlist.bloom"), path.join(storage, "scanning", "lastmodified.txt")).then(({
     outofdate
 }) => {
     if (outofdate === false) {
-        loadHashes()
+        loadHashes().then((out) => {
+            hashes = out
+            hashesLoaded = true
+        })
+
     } else {
-        update(path.join(storage, "scanning", "hashlist.txt"), path.join(storage, "scanning", "lastmodified.txt")).on("progress", (done, total) => {
+        update(path.join(storage, "scanning", "hashlist.bloom"), path.join(storage, "scanning", "lastmodified.txt"), path.join(path.join(tempdir, "hashlist.txt"))).on("progress", (done, total) => {
             // Make progress bar determinate
-            $(".scanning--progress").get(0).MDCLinearProgress.determinate = true
+            $(".app-progress").get(0).MDCLinearProgress.determinate = true
 
             // Make progress bar determinate
-            $(".scanning--progress").get(0).MDCLinearProgress.value = done / total
+            $(".app-progress").get(0).MDCLinearProgress.value = done / total
         }).on("end", () => {
-            loadHashes()
+            loadHashes().then((out) => {
+                hashes = out
+                hashesLoaded = true
+            })
+
         })
     }
 })
@@ -352,6 +363,8 @@ $(".scan--directory").get(0).MDCTextField.value = scanDir
 let total = 0
 let done = 0
 
+const fg = require("fast-glob")
+
 // If scan start triggered
 $(".scan--start").click(() => {
     if (!hashesLoaded) {
@@ -365,11 +378,11 @@ $(".scan--start").click(() => {
     db.getItem("recursive-scan").then((recursive) => {
         if (recursive) {
             db.getItem("regex-matching").then((regex) => {
-                require("glob")(path.join($(".scan--directory").get(0).MDCTextField.value, regex ? regex : "/**/*"), (err, files) => {
-                    if (err) snackBarMessage(`An error occurred: ${err}`)
-
+                fg(path.join($(".scan--directory").get(0).MDCTextField.value, regex ? regex : "/**/*"), {
+                    onlyFiles: true
+                }).then((files) => {
                     // Make progress bar determinate
-                    $(".scanning--progress").get(0).MDCLinearProgress.determinate = true
+                    $(".app-progress").get(0).MDCLinearProgress.determinate = true
 
                     // Start progressbar
                     total = files.length
@@ -378,7 +391,7 @@ $(".scan--start").click(() => {
                         // If the MD5 hash is in the list
                         if (hashesLoaded) scan(file, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {
                             done++
-                            $(".scanning--progress").get(0).MDCLinearProgress.value = done / total
+                            $(".app-progress").get(0).MDCLinearProgress.value = done / total
                         }, (err) => {
                             if (err) snackBarMessage(`A scanning error occurred: ${err}`)
                         })
@@ -389,7 +402,7 @@ $(".scan--start").click(() => {
             fs.readdir(path.resolve($(".scan--directory").get(0).MDCTextField.value), (err, files) => {
                 if (err) snackBarMessage(`An error occurred: ${err}`)
 
-                $(".scanning--progress").get(0).MDCLinearProgress.determinate = true
+                $(".app-progress").get(0).MDCLinearProgress.determinate = true
 
                 // Start progressbar
                 total = files.length
@@ -399,7 +412,7 @@ $(".scan--start").click(() => {
                     // If the MD5 hash is in the list
                     if (hashesLoaded) scan(file, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {
                         done++
-                        $(".scanning--progress").get(0).MDCLinearProgress.value = done / total
+                        $(".app-progress").get(0).MDCLinearProgress.value = done / total
                     }, (err) => {
                         snackBarMessage(`A scanning error occurred: ${err}`)
                     })
@@ -446,7 +459,7 @@ manageSettings($(".settings--rtp"), "rtp")
 manageSettings($(".settings--recursive-scan"), "recursive-scan")
 manageSettings($(".settings--threat-handling"), "threat-handling")
 
-import chokidar from "chokidar"
+const chokidar = require("chokidar")
 
 let watcher
 

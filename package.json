@@ -25,13 +25,16 @@
     "license": "MIT",
     "dependencies": {
         "@babel/core": "^7.3.4",
+        "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
         "babel-preset-env": "^1.7.0",
+        "babel-preset-react": "^6.24.1",
+        "babel-preset-stage-0": "^6.24.1",
         "babel-register": "^6.26.0",
         "bloomfilter": "^0.0.18",
         "chokidar": "^2.1.2",
         "dayjs": "^1.8.9",
         "downloads-folder": "^1.0.1",
-        "glob": "^7.1.3",
+        "fast-glob": "^2.2.6",
         "graceful-fs": "^4.1.15",
         "jquery": "^3.3.1",
         "line-by-line": "^0.1.6",
@@ -42,6 +45,7 @@
         "normalize.css": "^8.0.1",
         "request": "^2.88.0",
         "request-progress": "^3.0.0",
+        "temp-dir": "^1.0.0",
         "vue": "^2.6.8"
     },
     "devDependencies": {
