@@ -30,7 +30,7 @@ $(".mdc-icon-button[data-mdc-auto-init='MDCRipple']").each((_, {
 })
 
 // Provide improved filesystem functions
-const fs = require('graceful-fs').gracefulify(require('fs'))
+const fs = require("graceful-fs").gracefulify(require("fs"))
 
 // Notifications service
 const notifier = require("node-notifier")
@@ -79,7 +79,7 @@ const electron = require("electron")
 const storage = path.join((electron.app || electron.remote.app).getPath("appData"), "rosav")
 
 // Set temporary storage location
-const tempdir = path.join(require('temp-dir'), "rosav")
+const tempdir = path.join(require("temp-dir"), "rosav")
 
 // Populate storage locations
 populateDirectory(storage)
@@ -97,7 +97,7 @@ db.init({
 })
 
 // Bloom filter functionality
-const Bloomfilter = require('node-bloomfilter')
+const Bloomfilter = require("bloomfilter")
 
 // // Hash list
 // let hashes = new BloomFilter(
@@ -108,11 +108,15 @@ const Bloomfilter = require('node-bloomfilter')
 // If hashes have loaded
 let hashesLoaded = false
 
+const firstline = require("firstline")
+
+const lzjs = require("lzjs")
+
 // Hashes loader
-const loadHashes = (hashes) => new Promise(resolve => {
-    Bloomfilter.fromStream(fs.createReadStream(hashes)).then(deser => {
-        resolve(deser)
-    });
+const loadHashes = (hashes, hashesparams) => new Promise(resolve => {
+    Promise.all([firstline(hashesparams), firstline(hashes)]).then((val) => {
+        resolve(new BloomFilter(JSON.parse(lzjs.decompress(val[1])), parseInt(val[0])))
+    })
 })
 
 let hashes
@@ -173,7 +177,7 @@ const scan = (dir, action) => new Promise((resolve, reject) => {
     })
 })
 
-const EventEmitter = require('events')
+const EventEmitter = require("events")
 
 // External file requester
 const requestTemplate = require("request")
@@ -213,10 +217,16 @@ const countFileLines = filePath => new Promise((resolve, reject) => {
         }).on("error", reject)
 })
 
+const bestForBloom = (n, p) => {
+    m = Math.ceil((n * Math.log(p)) / Math.log(1 / Math.pow(2, Math.log(2))))
+    k = Math.round((m / n) * Math.log(2))
+    return [m, k]
+}
+
 // Line by line reader
 const LineByLineReader = require("line-by-line")
 
-const update = (hashes, lastmodified, temphashes) => {
+const update = (hashes, hashesparams, lastmodified, temphashes) => {
     const self = new EventEmitter()
 
     // Download latest commit date of hash list
@@ -240,41 +250,48 @@ const update = (hashes, lastmodified, temphashes) => {
             self.emit("progress", size.transferred / size.total / 2, 1.0)
         })
         .on("end", () => {
-
             countFileLines(temphashes).then((fileLines) => {
-                const hashes = BloomFilter.bestFor(
-                    fileLines, // Number of bits to allocate
-                    1e-10 // Number of hash functions (currently set at 1/1 billion)
-                )
+                    const bestFilter = bestForBloom(
+                        fileLines, // Number of bits to allocate
+                        1e-10 // Number of hash functions (currently set at 1/1 billion)
+                    )
 
-                let done = 0
+                    const hashes = BloomFilter(
+                        bestFilter[0],
+                        bestFilter[1]
+                    )
 
-                // Line reader
-                const hlr = new LineByLineReader(hashlist, {
-                    encoding: "utf8",
-                    skipEmptyLines: true
+                    let done = 0
+
+                    // Line reader
+                    const hlr = new LineByLineReader(hashlist, {
+                        encoding: "utf8",
+                        skipEmptyLines: true
+                    })
+
+                    // Line reader error
+                    hlr.on("error", (err) => self.emit("error", err))
+
+                    // New line from line reader
+                    hlr.on("line", (line) => {
+                        hashes.add(line)
+                        done++
+                        self.emit("progress", done / fileLines + 0.5, 1.0)
+                    })
+
+                    // Line reader finished
+                    hlr.on("end", () => {
+                        fs.writeFile(hashes, lzjs.compress(JSON.stringify([].slice.call(hashes.buckets))), err => {
+                            if (err) reject(err)
+                            fs.writeFile(hashesparams, bestFilter[1].toString(), () => self.emit("end"))
+                        })
+                    })
+
                 })
+                .pipe(fs.createWriteStream(temphashes))
 
-                // Line reader error
-                hlr.on("error", (err) => self.emit("error", err))
-
-                // New line from line reader
-                hlr.on("line", (line) => {
-                    hashes.put(line)
-                    done++
-                    self.emit("progress", done / fileLines + 0.5, 1.0)
-                })
-
-                // Line reader finished
-                hlr.on("end", () => {
-                    hashes.toStream().pipe(fs.createWriteStream(hashlist)).on('finish', () => self.emit("end"))
-                })
-            })
-
+            return self
         })
-        .pipe(fs.createWriteStream(temphashes))
-
-    return self
 }
 
 const checkupdate = (hashlist, lastmodified) => new Promise((resolve, reject) => {
@@ -323,17 +340,16 @@ const checkupdate = (hashlist, lastmodified) => new Promise((resolve, reject) =>
     })
 })
 
-checkupdate(path.join(storage, "scanning", "hashlist.bloom"), path.join(storage, "scanning", "lastmodified.txt")).then(({
+checkupdate(path.join(storage, "scanning", "hashlist.txt"), path.join(storage, "scanning", "lastmodified.txt")).then(({
     outofdate
 }) => {
     if (outofdate === false) {
-        loadHashes().then((out) => {
+        loadHashes(path.join(storage, "scanning", "hashlist.txt"), path.join(storage, "scanning", "hashesparams.txt")).then((out) => {
             hashes = out
-            hashesLoaded = true
         })
 
     } else {
-        update(path.join(storage, "scanning", "hashlist.bloom"), path.join(storage, "scanning", "lastmodified.txt"), path.join(path.join(tempdir, "hashlist.txt"))).on("progress", (done, total) => {
+        update(path.join(storage, "scanning", "hashlist.txt"), path.join(storage, "scanning", "hashesparams.txt"), path.join(storage, "scanning", "lastmodified.txt"), path.join(path.join(tempdir, "hashlist.txt"))).on("progress", (done, total) => {
             // Make progress bar determinate
             $(".app-progress").get(0).MDCLinearProgress.determinate = true
 
@@ -356,7 +372,7 @@ checkupdate(path.join(storage, "scanning", "hashlist.bloom"), path.join(storage,
 const scanDir = require("os").homedir()
 
 // Downloads directory
-const watchDir = path.resolve(require('downloads-folder')())
+const watchDir = path.resolve(require("downloads-folder")())
 
 $(".scan--directory").get(0).MDCTextField.value = scanDir
 
@@ -427,7 +443,7 @@ const manageSettings = (el, name) => {
     if (el.hasClass("mdc-select")) {
         const mdcSelect = el.get(0).MDCSelect
         db.getItem(name).then((val) => {
-            if (typeof val !== 'undefined') mdcSelect.value = val
+            if (typeof val !== "undefined") mdcSelect.value = val
             mdcSelect.listen("MDCSelect:change", () => {
                 db.setItem(name, mdcSelect.value)
             })
@@ -435,7 +451,7 @@ const manageSettings = (el, name) => {
     } else if (el.hasClass("mdc-text-field")) {
         const mdcTextField = el
         db.getItem(name).then((val) => {
-            if (typeof val !== 'undefined') mdcTextField.get(0).MDCTextField.value = val
+            if (typeof val !== "undefined") mdcTextField.get(0).MDCTextField.value = val
             mdcTextField.find("input").on("input", () => {
                 db.setItem(name, mdcTextField.get(0).MDCTextField.value)
             })
@@ -443,7 +459,7 @@ const manageSettings = (el, name) => {
     } else if (el.hasClass("mdc-switch")) {
         const mdcSwitch = el
         db.getItem(name).then((val) => {
-            if (typeof val !== 'undefined') mdcSwitch.get(0).MDCSwitch.checked = val
+            if (typeof val !== "undefined") mdcSwitch.get(0).MDCSwitch.checked = val
             mdcSwitch.find(".mdc-switch__native-control").on("change", () => {
                 db.setItem(name, mdcSwitch.get(0).MDCSwitch.checked)
             })
@@ -453,11 +469,7 @@ const manageSettings = (el, name) => {
     }
 }
 
-manageSettings($(".settings--update-behaviour"), "update-behaviour")
-manageSettings($(".settings--regex-matching"), "regex-matching")
-manageSettings($(".settings--rtp"), "rtp")
-manageSettings($(".settings--recursive-scan"), "recursive-scan")
-manageSettings($(".settings--threat-handling"), "threat-handling")
+manageSettings($(".settings--update-behaviour"), "update-behaviour") manageSettings($(".settings--regex-matching"), "regex-matching") manageSettings($(".settings--rtp"), "rtp") manageSettings($(".settings--recursive-scan"), "recursive-scan") manageSettings($(".settings--threat-handling"), "threat-handling")
 
 const chokidar = require("chokidar")
 
