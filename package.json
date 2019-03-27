@@ -1,39 +1,87 @@
 {
     "name": "@rosav/gui",
-    "description": "The GUI for ROS AV.",
+    "productName": "ROS AV",
     "version": "0.0.0",
-    "main": "main.js",
+    "description": "The GUI for ROS AV.",
+    "main": "src/index.js",
     "bin": {
-        "rosav-gui": "electron"
+        "rosav-gui": "electron-forge start"
     },
     "scripts": {
-        "start": "electron .",
-        "build": "electron-builder"
+        "start": "electron-forge start",
+        "package": "electron-forge package",
+        "make": "electron-forge make",
+        "publish": "electron-forge publish",
+        "lint": "eslint src --color"
     },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/ros-av/gui.git"
     },
-    "build": {
-        "productName": "ROS AV",
-        "appId": "av.ros",
-        "mac": {
-            "category": "av.ros.security.application"
-        }
+    "keywords": [
+        "av",
+        "antivirus",
+        "viruslist"
+    ],
+    "bugs": {
+        "url": "https://github.com/ros-av/gui/issues"
+    },
+    "homepage": "https://ros-av.github.io",
+    "publishConfig": {
+        "access": "public"
     },
     "author": "Richie Bendall <richiebendall@gmail.com>",
     "license": "MIT",
+    "config": {
+        "forge": {
+            "make_targets": {
+                "win32": [
+                    "squirrel"
+                ],
+                "darwin": [
+                    "zip"
+                ],
+                "linux": [
+                    "deb",
+                    "rpm"
+                ]
+            },
+            "electronPackagerConfig": {
+                "packageManager": "yarn"
+            },
+            "electronWinstallerConfig": {
+                "name": "rosav"
+            },
+            "electronInstallerDebian": {},
+            "electronInstallerRedhat": {},
+            "github_repository": {
+                "owner": "ros-av",
+                "name": "gui"
+            },
+            "windowsStoreConfig": {
+                "packageName": "rosav",
+                "name": "ROS AV"
+            }
+        }
+    },
     "dependencies": {
-        "@babel/core": "^7.3.4",
-        "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
-        "babel-preset-env": "^1.7.0",
-        "babel-preset-react": "^6.24.1",
-        "babel-preset-stage-0": "^6.24.1",
-        "babel-register": "^6.26.0",
+        "@material/auto-init": "^1.0.0",
+        "@material/icon-button": "^1.1.0",
+        "@material/linear-progress": "^1.1.0",
+        "@material/list": "^1.1.0",
+        "@material/ripple": "^1.1.0",
+        "@material/switch": "^1.1.0",
+        "@material/tab": "^1.1.0",
+        "@material/tab-bar": "^1.1.0",
+        "@material/tab-indicator": "^1.1.0",
+        "@material/textfield": "^1.1.0",
+        "@material/top-app-bar": "^1.1.0",
         "bloomfilter": "^0.0.18",
         "chokidar": "^2.1.2",
         "dayjs": "^1.8.9",
         "downloads-folder": "^1.0.1",
+        "electron-compile": "^6.4.4",
+        "electron-squirrel-startup": "^1.0.0",
         "fast-glob": "^2.2.6",
         "firstline": "^2.0.2",
         "graceful-fs": "^4.1.15",
@@ -52,19 +100,15 @@
         "vue": "^2.6.8"
     },
     "devDependencies": {
-        "electron": "^4.1.0",
-        "electron-builder": "^20.39.0"
-    },
-    "keywords": [
-        "av",
-        "antivirus",
-        "viruslist"
-    ],
-    "bugs": {
-        "url": "https://github.com/ros-av/gui/issues"
-    },
-    "homepage": "https://ros-av.github.io",
-    "publishConfig": {
-        "access": "public"
+        "babel-plugin-transform-async-to-generator": "^6.24.1",
+        "babel-preset-env": "^1.7.0",
+        "babel-preset-react": "^6.24.1",
+        "electron-forge": "^5.2.4",
+        "electron-prebuilt-compile": "4.0.0",
+        "eslint": "^3",
+        "eslint-config-airbnb": "^15",
+        "eslint-plugin-import": "^2",
+        "eslint-plugin-jsx-a11y": "^5",
+        "eslint-plugin-react": "^7"
     }
 }

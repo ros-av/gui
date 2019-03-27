@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>ROS AV</title>
-    <link rel="stylesheet" href="node_modules\material-components-web\dist\material-components-web.min.css">
+    <link rel="stylesheet" href="..\node_modules\material-components-web\dist\material-components-web.min.css">
 
     <style>
         :root {
@@ -73,7 +73,7 @@
         }
     </style>
 
-    <link rel="stylesheet" href="node_modules\normalize.css\normalize.css">
+    <link rel="stylesheet" href="..\node_modules\normalize.css\normalize.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
 </head>
 
@@ -339,18 +339,11 @@
                 </div>
             </div>
         </div>
-        <div class="mdc-snackbar mdc-snackbar--leading main--snackbar">
+        <div class="mdc-snackbar mdc-snackbar--leading main--snackbar" data-mdc-auto-init="MDCSnackbar">
             <div class="mdc-snackbar__surface">
                 <div class="mdc-snackbar__label" role="status" aria-live="polite"></div>
             </div>
         </div>
-        <script src="node_modules/material-components-web/dist/material-components-web.min.js"></script>
-        <script src="node_modules/vue/dist/vue.min.js"></script>
-
-        <script>
-            require("./renderer.js")
-        </script>
-
 </body>
 
 </html>

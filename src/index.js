@@ -1,36 +1,41 @@
-// Modules to control application life and create native browser window
-const {
+import {
     app,
     Menu,
     Tray,
     BrowserWindow
-} = require('electron')
+} from 'electron'
 
-app.commandLine.appendSwitch('--autoplay-policy', 'no-user-gesture-required')
+const path = require("path")
+
+// Handle creating/removing shortcuts on Windows when installing/uninstalling.
+if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
+    app.quit()
+}
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.on('ready', () => {
+const createWindow = () => {
     // Create the browser window.
     mainWindow = new BrowserWindow({
         width: 960,
         height: 680,
-        icon: 'icon.ico',
-        frame: false,
-        resizable: false
+        icon: path.join(__dirname, "icon.ico"),
+        webPreferences: {
+            nodeIntegration: false,
+            nodeIntegrationInWorker: false,
+            preload: path.join(__dirname, "app-loader.js"),
+        },
+        frame: false
     })
 
-    mainWindow.on('minimize', event => {
+    mainWindow.on("minimize", event => {
         event.preventDefault()
         mainWindow.hide()
     })
 
-    mainWindow.on('close', event => {
+    mainWindow.on("close", event => {
         if (!app.isQuiting) {
             event.preventDefault()
             mainWindow.hide()
@@ -39,16 +44,16 @@ app.on('ready', () => {
         return false
     })
 
-    const tray = new Tray('icon.ico')
+    const tray = new Tray(path.join(__dirname, "icon.ico"))
 
     const contextMenu = Menu.buildFromTemplate([{
-            label: 'Open ROS AV',
+            label: "Open ROS AV",
             click() {
                 mainWindow.show()
             }
         },
         {
-            label: 'Quit ROS AV',
+            label: "Quit ROS AV",
             click() {
                 app.isQuiting = true
                 app.quit()
@@ -56,18 +61,18 @@ app.on('ready', () => {
         }
     ])
 
-    tray.on('click', () => {
+    tray.on("click", () => {
         tray.popUpContextMenu()
     })
 
-    tray.setToolTip('ROS AV')
+    tray.setToolTip("ROS AV")
     tray.setContextMenu(contextMenu)
 
     // and load the index.html of the app.
-    mainWindow.loadFile('index.html')
+    mainWindow.loadURL(`file://${__dirname}/index.html`)
 
     // Open the DevTools.
-    // mainWindow.webContents.openDevTools()
+    mainWindow.webContents.openDevTools()
 
     // Emitted when the window is closed.
     mainWindow.on('closed', () => {
@@ -76,24 +81,25 @@ app.on('ready', () => {
         // when you should delete the corresponding element.
         mainWindow = null
     })
-})
+}
+
+// This method will be called when Electron has finished
+// initialization and is ready to create browser windows.
+// Some APIs can only be used after this event occurs.
+app.on('ready', createWindow)
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
-    // On macOS it is common for applications and their menu bar
+    // On OS X it is common for applications and their menu bar
     // to stay active until the user quits explicitly with Cmd + Q
-    if (process.platform !== 'darwin') {
-        app.quit()
-    }
+    if (process.platform !== 'darwin') app.quit()
 })
 
 app.on('activate', () => {
-    // On macOS it's common to re-create a window in the app when the
+    // On OS X it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (mainWindow === null) {
-        createWindow()
-    }
+    if (mainWindow === null) createWindow()
 })
 
 // In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
+// code. You can also put them in separate files and import them here.

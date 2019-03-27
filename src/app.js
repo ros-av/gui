@@ -1,50 +1,128 @@
-// Define Vue app
-const app = new Vue({
-    el: ".app",
-    data: {
-        activeTab: "dashboard"
-    },
-    methods: {
-        isActiveTab(tabId) {
-            return this.activeTab === tabId
+// App data storage path
+import electron from "electron"
+
+electron.remote.getCurrentWebContents().once('dom-ready', () => {
+    const Vue = require("vue/dist/vue.esm.js")
+
+    // Define Vue app
+    const app = new Vue({
+        el: ".app",
+        data: {
+            activeTab: "dashboard"
         },
-        setActiveTab(tabId) {
-            this.activeTab = tabId
+        methods: {
+            isActiveTab(tabId) {
+                return this.activeTab === tabId
+            },
+            setActiveTab(tabId) {
+                this.activeTab = tabId
+            }
         }
-    }
+    })
+
+    // Jquery
+    const $ = require('jquery')
+
+    // When directory selected
+    $(".scan--directory-helper").change(() => {
+        // The textfield value to path selected
+        document.querySelector(".scan--directory").get(0).MDCTextField.value = $(".scan--directory-helper").files[0].path
+    })
+
+    // When choose directory button clicked
+    $(".scan--directory-choose").click(() => {
+        // Activate directory chooser
+        $(".scan--directory-helper").click()
+    })
+
+    // If scan start triggered
+    $(".scan--start").click(() => {
+        if (!hashesLoaded) {
+            snackBarMessage("Hashes not fully loaded.")
+            return
+        }
+
+        // Switch to scanning tab
+        app.setActiveTab("scanning")
+
+        db.getItem("recursive-scan").then((recursive) => {
+            if (recursive) {
+                db.getItem("regex-matching").then((regex) => {
+                    fg(path.join(document.querySelector(".scan--directory").MDCTextField.value, regex ? regex : "/**/*"), {
+                        onlyFiles: true
+                    }).then((files) => {
+                        // Make progress bar determinate
+                        document.querySelector(".app-progress").MDCLinearProgress.determinate = true
+
+                        // Start progressbar
+                        total = files.length
+
+                        files.forEach((file) => {
+                            // If the MD5 hash is in the list
+                            if (hashesLoaded) scan(file, document.querySelector(".settings--threat-handling").MDCSelect.value).then(() => {
+                                done++
+                                document.querySelector(".app-progress").MDCLinearProgress.value = done / total
+                            }, (err) => {
+                                if (err) snackBarMessage(`A scanning error occurred: ${err}`)
+                            })
+                        })
+                    })
+                })
+            } else {
+                fs.readdir(path.resolve(document.querySelector(".scan--directory").MDCTextField.value), (err, files) => {
+                    if (err) snackBarMessage(`An error occurred: ${err}`)
+
+                    document.querySelector(".app-progress").MDCLinearProgress.determinate = true
+
+                    // Start progressbar
+                    total = files.length
+
+                    // For each file
+                    files.forEach((file) => {
+                        // If the MD5 hash is in the list
+                        if (hashesLoaded) scan(file, document.querySelector(".settings--threat-handling").MDCSelect.value).then(() => {
+                            done++
+                            document.querySelector(".app-progress").MDCLinearProgress.value = done / total
+                        }, (err) => {
+                            snackBarMessage(`A scanning error occurred: ${err}`)
+                        })
+                    })
+                })
+            }
+        })
+    })
+
+    // For each icon button with ripples
+    $(".mdc-icon-button[data-mdc-auto-init='MDCRipple']").each((_, {
+        MDCRipple
+    }) => {
+
+        // Fix ripples
+        MDCRipple.unbounded = true
+    })
 })
+
+import {
+    autoInit
+} from "material-components-web"
 
 // Auto init MDC elements
-mdc.autoInit()
-
-// Jquery
-const $ = require("jquery")
-
-// For each icon button with ripples
-$(".mdc-icon-button[data-mdc-auto-init='MDCRipple']").each((_, {
-    MDCRipple
-}) => {
-
-    // Fix ripples
-    MDCRipple.unbounded = true
-})
+autoInit()
 
 // Provide improved filesystem functions
 const fs = require("graceful-fs").gracefulify(require("fs"))
 
 // Notifications service
-const notifier = require("node-notifier")
+import notifier from "node-notifier"
 
 // Path functions
-const path = require("path")
-
-// Attach snackbar
-const snackbar = new mdc.snackbar.MDCSnackbar($(".main--snackbar").get(0))
+import path from "path"
 
 const appIcon = process.platform === "darwin" ? path.join(__dirname, "build", "icons", "mac", "icon.icns") : path.join(__dirname, "build", "icons", "win", "icon.ico")
 
 // Display snackbar message
 const snackBarMessage = (message, volume = 0.0) => {
+    const snackbar = document.querySelector(".main--snackbar").MDCSnackbar
     snackbar.close()
     snackbar.labelText = message
     snackbar.open()
@@ -55,8 +133,8 @@ const snackBarMessage = (message, volume = 0.0) => {
         sound: false
     })
     if (volume > 0.0) {
-        $(".ping").get(0).volume = volume
-        $(".ping").get(0).play()
+        document.querySelector(".ping").volume = volume
+        document.querySelector(".ping").play()
     }
 }
 
@@ -72,9 +150,6 @@ const populateDirectory = (dir) => {
     })
 }
 
-// App data storage path
-const electron = require("electron")
-
 // Set storage location
 const storage = path.join((electron.app || electron.remote.app).getPath("appData"), "rosav")
 
@@ -89,7 +164,7 @@ populateDirectory(path.join(storage, "reports"))
 populateDirectory(path.join(storage, "plugins"))
 
 // Settings storage
-const db = require("node-persist")
+import db from "node-persist"
 
 // Initialise storage
 db.init({
@@ -97,7 +172,7 @@ db.init({
 })
 
 // Bloom filter functionality
-const Bloomfilter = require("bloomfilter")
+import Bloomfilter from "bloomfilter"
 
 // // Hash list
 // let hashes = new BloomFilter(
@@ -108,9 +183,8 @@ const Bloomfilter = require("bloomfilter")
 // If hashes have loaded
 let hashesLoaded = false
 
-const firstline = require("firstline")
-
-const lzjs = require("lzjs")
+import firstline from "firstline"
+import lzjs from "lzjs"
 
 // Hashes loader
 const loadHashes = (hashes, hashesparams) => new Promise(resolve => {
@@ -121,23 +195,13 @@ const loadHashes = (hashes, hashesparams) => new Promise(resolve => {
 
 let hashes
 
-// When directory selected
-$(".scan--directory-helper").change(() => {
-    // The textfield value to path selected
-    $(".scan--directory").get(0).MDCTextField.value = $(".scan--directory-helper").get(0).files[0].path
-})
 
-// When choose directory button clicked
-$(".scan--directory-choose").click(() => {
-    // Activate directory chooser
-    $(".scan--directory-helper").click()
-})
 
 // Time parser
-const dayjs = require("dayjs")
+import dayjs from "dayjs"
 
 // MD5 from file
-const MD5File = require("md5-file")
+import MD5File from "md5-file"
 
 const safe = (dir, hashes) => new Promise((resolve, reject) => {
     fs.lstat(path.resolve(dir), (err, stats) => {
@@ -177,10 +241,12 @@ const scan = (dir, action) => new Promise((resolve, reject) => {
     })
 })
 
-const EventEmitter = require("events")
+import EventEmitter from "events"
 
 // External file requester
-const requestTemplate = require("request")
+import {
+    request as requestTemplate
+} from "request"
 
 const userAgent = "Mozilla/5.0 (Windows NT 10.0 WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3163.100 Safari/537.36"
 const githubapi = requestTemplate.defaults({
@@ -200,7 +266,7 @@ const request = requestTemplate.defaults({
     }
 })
 
-const rprog = require("request-progress")
+import rprog from "request-progress"
 
 const countFileLines = filePath => new Promise((resolve, reject) => {
     let lineCount = 0
@@ -218,13 +284,13 @@ const countFileLines = filePath => new Promise((resolve, reject) => {
 })
 
 const bestForBloom = (n, p) => {
-    m = Math.ceil((n * Math.log(p)) / Math.log(1 / Math.pow(2, Math.log(2))))
+    m = Math.ceil((n * Math.log(p)) / Math.log(1 / (2 ** Math.log(2))))
     k = Math.round((m / n) * Math.log(2))
     return [m, k]
 }
 
 // Line by line reader
-const LineByLineReader = require("line-by-line")
+import LineByLineReader from "line-by-line"
 
 const update = (hashes, hashesparams, lastmodified, temphashes) => {
     const self = new EventEmitter()
@@ -351,10 +417,10 @@ checkupdate(path.join(storage, "scanning", "hashlist.lzstring.json"), path.join(
     } else {
         update(path.join(storage, "scanning", "hashlist.lzstring.json"), path.join(storage, "scanning", "hashesparams.txt"), path.join(storage, "scanning", "lastmodified.txt"), path.join(path.join(tempdir, "hashlist.txt"))).on("progress", (done, total) => {
             // Make progress bar determinate
-            $(".app-progress").get(0).MDCLinearProgress.determinate = true
+            document.querySelector(".app-progress").MDCLinearProgress.determinate = true
 
             // Make progress bar determinate
-            $(".app-progress").get(0).MDCLinearProgress.value = done / total
+            document.querySelector(".app-progress").MDCLinearProgress.value = done / total
         }).on("end", () => {
             loadHashes().then((out) => {
                 hashes = out
@@ -374,69 +440,14 @@ const scanDir = require("os").homedir()
 // Downloads directory
 const watchDir = path.resolve(require("downloads-folder")())
 
-$(".scan--directory").get(0).MDCTextField.value = scanDir
+document.querySelector(".scan--directory").MDCTextField.value = scanDir
 
 let total = 0
 let done = 0
 
-const fg = require("fast-glob")
+import fg from "fast-glob"
 
-// If scan start triggered
-$(".scan--start").click(() => {
-    if (!hashesLoaded) {
-        snackBarMessage("Hashes not fully loaded.")
-        return
-    }
 
-    // Switch to scanning tab
-    app.setActiveTab("scanning")
-
-    db.getItem("recursive-scan").then((recursive) => {
-        if (recursive) {
-            db.getItem("regex-matching").then((regex) => {
-                fg(path.join($(".scan--directory").get(0).MDCTextField.value, regex ? regex : "/**/*"), {
-                    onlyFiles: true
-                }).then((files) => {
-                    // Make progress bar determinate
-                    $(".app-progress").get(0).MDCLinearProgress.determinate = true
-
-                    // Start progressbar
-                    total = files.length
-
-                    files.forEach((file) => {
-                        // If the MD5 hash is in the list
-                        if (hashesLoaded) scan(file, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {
-                            done++
-                            $(".app-progress").get(0).MDCLinearProgress.value = done / total
-                        }, (err) => {
-                            if (err) snackBarMessage(`A scanning error occurred: ${err}`)
-                        })
-                    })
-                })
-            })
-        } else {
-            fs.readdir(path.resolve($(".scan--directory").get(0).MDCTextField.value), (err, files) => {
-                if (err) snackBarMessage(`An error occurred: ${err}`)
-
-                $(".app-progress").get(0).MDCLinearProgress.determinate = true
-
-                // Start progressbar
-                total = files.length
-
-                // For each file
-                files.forEach((file) => {
-                    // If the MD5 hash is in the list
-                    if (hashesLoaded) scan(file, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {
-                        done++
-                        $(".app-progress").get(0).MDCLinearProgress.value = done / total
-                    }, (err) => {
-                        snackBarMessage(`A scanning error occurred: ${err}`)
-                    })
-                })
-            })
-        }
-    })
-})
 
 // Settings manager
 const manageSettings = (el, name) => {
@@ -475,12 +486,12 @@ manageSettings($(".settings--rtp"), "rtp")
 manageSettings($(".settings--recursive-scan"), "recursive-scan")
 manageSettings($(".settings--threat-handling"), "threat-handling")
 
-const chokidar = require("chokidar")
+import chokidar from "chokidar"
 
 let watcher
 
 $(".settings--rtp").find(".mdc-switch__native-control").on("change", () => {
-    if ($(".settings--rtp").get(0).MDCSwitch.checked) {
+    if (document.querySelector(".settings--rtp").MDCSwitch.checked) {
 
         watcher = chokidar.watch(watchDir, {
             persistent: true
@@ -488,12 +499,12 @@ $(".settings--rtp").find(".mdc-switch__native-control").on("change", () => {
 
         watcher
             .on("add", dir => {
-                if (hashesLoaded) scan(dir, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {}, (err) => {
+                if (hashesLoaded) scan(dir, document.querySelector(".settings--threat-handling").MDCSelect.value).then(() => {}, (err) => {
                     if (err) snackBarMessage(`A scanning error occurred: ${err}`)
                 })
             })
             .on("change", dir => {
-                if (hashesLoaded) scan(dir, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {}, (err) => {
+                if (hashesLoaded) scan(dir, document.querySelector(".settings--threat-handling").MDCSelect.value).then(() => {}, (err) => {
                     if (err) snackBarMessage(`A scanning error occurred: ${err}`)
                 })
             })
