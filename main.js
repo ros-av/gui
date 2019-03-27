@@ -39,7 +39,7 @@ app.on('ready', () => {
         return false
     })
 
-    tray = new Tray('icon.ico')
+    const tray = new Tray('icon.ico')
 
     const contextMenu = Menu.buildFromTemplate([{
             label: 'Open ROS AV',

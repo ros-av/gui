@@ -340,16 +340,16 @@ const checkupdate = (hashlist, lastmodified) => new Promise((resolve, reject) =>
     })
 })
 
-checkupdate(path.join(storage, "scanning", "hashlist.txt"), path.join(storage, "scanning", "lastmodified.txt")).then(({
+checkupdate(path.join(storage, "scanning", "hashlist.lzstring.json"), path.join(storage, "scanning", "lastmodified.txt")).then(({
     outofdate
 }) => {
     if (outofdate === false) {
-        loadHashes(path.join(storage, "scanning", "hashlist.txt"), path.join(storage, "scanning", "hashesparams.txt")).then((out) => {
+        loadHashes(path.join(storage, "scanning", "hashlist.lzstring.json"), path.join(storage, "scanning", "hashesparams.txt")).then((out) => {
             hashes = out
         })
 
     } else {
-        update(path.join(storage, "scanning", "hashlist.txt"), path.join(storage, "scanning", "hashesparams.txt"), path.join(storage, "scanning", "lastmodified.txt"), path.join(path.join(tempdir, "hashlist.txt"))).on("progress", (done, total) => {
+        update(path.join(storage, "scanning", "hashlist.lzstring.json"), path.join(storage, "scanning", "hashesparams.txt"), path.join(storage, "scanning", "lastmodified.txt"), path.join(path.join(tempdir, "hashlist.txt"))).on("progress", (done, total) => {
             // Make progress bar determinate
             $(".app-progress").get(0).MDCLinearProgress.determinate = true
 
@@ -469,7 +469,11 @@ const manageSettings = (el, name) => {
     }
 }
 
-manageSettings($(".settings--update-behaviour"), "update-behaviour") manageSettings($(".settings--regex-matching"), "regex-matching") manageSettings($(".settings--rtp"), "rtp") manageSettings($(".settings--recursive-scan"), "recursive-scan") manageSettings($(".settings--threat-handling"), "threat-handling")
+manageSettings($(".settings--update-behaviour"), "update-behaviour")
+manageSettings($(".settings--regex-matching"), "regex-matching")
+manageSettings($(".settings--rtp"), "rtp")
+manageSettings($(".settings--recursive-scan"), "recursive-scan")
+manageSettings($(".settings--threat-handling"), "threat-handling")
 
 const chokidar = require("chokidar")
 
