@@ -1,106 +1,110 @@
+console.count()
+
 // App data storage path
 import electron from "electron"
+console.count()
+import {
+    Vue
+} from "vue/dist/vue.esm.js"
 
-electron.remote.getCurrentWebContents().once('dom-ready', () => {
-    const Vue = require("vue/dist/vue.esm.js")
-
-    // Define Vue app
-    const app = new Vue({
-        el: ".app",
-        data: {
-            activeTab: "dashboard"
+console.count()
+// Define Vue app
+const app = new Vue({
+    el: ".app",
+    data: {
+        activeTab: "dashboard"
+    },
+    methods: {
+        isActiveTab(tabId) {
+            return this.activeTab === tabId
         },
-        methods: {
-            isActiveTab(tabId) {
-                return this.activeTab === tabId
-            },
-            setActiveTab(tabId) {
-                this.activeTab = tabId
-            }
+        setActiveTab(tabId) {
+            this.activeTab = tabId
         }
-    })
+    }
+})
+console.count()
+// Jquery
+const $ = require('jquery')
+console.count()
+// When directory selected
+$(".scan--directory-helper").change(() => {
+    // The textfield value to path selected
+    document.querySelector(".scan--directory").get(0).MDCTextField.value = $(".scan--directory-helper").files[0].path
+})
 
-    // Jquery
-    const $ = require('jquery')
+// When choose directory button clicked
+$(".scan--directory-choose").click(() => {
+    // Activate directory chooser
+    $(".scan--directory-helper").click()
+})
 
-    // When directory selected
-    $(".scan--directory-helper").change(() => {
-        // The textfield value to path selected
-        document.querySelector(".scan--directory").get(0).MDCTextField.value = $(".scan--directory-helper").files[0].path
-    })
+// If scan start triggered
+$(".scan--start").click(() => {
+    if (!hashesLoaded) {
+        snackBarMessage("Hashes not fully loaded.")
+        return
+    }
 
-    // When choose directory button clicked
-    $(".scan--directory-choose").click(() => {
-        // Activate directory chooser
-        $(".scan--directory-helper").click()
-    })
+    // Switch to scanning tab
+    app.setActiveTab("scanning")
 
-    // If scan start triggered
-    $(".scan--start").click(() => {
-        if (!hashesLoaded) {
-            snackBarMessage("Hashes not fully loaded.")
-            return
-        }
-
-        // Switch to scanning tab
-        app.setActiveTab("scanning")
-
-        db.getItem("recursive-scan").then((recursive) => {
-            if (recursive) {
-                db.getItem("regex-matching").then((regex) => {
-                    fg(path.join(document.querySelector(".scan--directory").MDCTextField.value, regex ? regex : "/**/*"), {
-                        onlyFiles: true
-                    }).then((files) => {
-                        // Make progress bar determinate
-                        document.querySelector(".app-progress").MDCLinearProgress.determinate = true
-
-                        // Start progressbar
-                        total = files.length
-
-                        files.forEach((file) => {
-                            // If the MD5 hash is in the list
-                            if (hashesLoaded) scan(file, document.querySelector(".settings--threat-handling").MDCSelect.value).then(() => {
-                                done++
-                                document.querySelector(".app-progress").MDCLinearProgress.value = done / total
-                            }, (err) => {
-                                if (err) snackBarMessage(`A scanning error occurred: ${err}`)
-                            })
-                        })
-                    })
-                })
-            } else {
-                fs.readdir(path.resolve(document.querySelector(".scan--directory").MDCTextField.value), (err, files) => {
-                    if (err) snackBarMessage(`An error occurred: ${err}`)
-
+    db.getItem("recursive-scan").then((recursive) => {
+        if (recursive) {
+            db.getItem("regex-matching").then((regex) => {
+                fg(path.join(document.querySelector(".scan--directory").MDCTextField.value, regex ? regex : "/**/*"), {
+                    onlyFiles: true
+                }).then((files) => {
+                    // Make progress bar determinate
                     document.querySelector(".app-progress").MDCLinearProgress.determinate = true
 
                     // Start progressbar
                     total = files.length
 
-                    // For each file
                     files.forEach((file) => {
                         // If the MD5 hash is in the list
                         if (hashesLoaded) scan(file, document.querySelector(".settings--threat-handling").MDCSelect.value).then(() => {
                             done++
                             document.querySelector(".app-progress").MDCLinearProgress.value = done / total
                         }, (err) => {
-                            snackBarMessage(`A scanning error occurred: ${err}`)
+                            if (err) snackBarMessage(`A scanning error occurred: ${err}`)
                         })
                     })
                 })
-            }
-        })
-    })
+            })
+        } else {
+            fs.readdir(path.resolve(document.querySelector(".scan--directory").MDCTextField.value), (err, files) => {
+                if (err) snackBarMessage(`An error occurred: ${err}`)
 
-    // For each icon button with ripples
-    $(".mdc-icon-button[data-mdc-auto-init='MDCRipple']").each((_, {
-        MDCRipple
-    }) => {
+                document.querySelector(".app-progress").MDCLinearProgress.determinate = true
 
-        // Fix ripples
-        MDCRipple.unbounded = true
+                // Start progressbar
+                total = files.length
+
+                // For each file
+                files.forEach((file) => {
+                    // If the MD5 hash is in the list
+                    if (hashesLoaded) scan(file, document.querySelector(".settings--threat-handling").MDCSelect.value).then(() => {
+                        done++
+                        document.querySelector(".app-progress").MDCLinearProgress.value = done / total
+                    }, (err) => {
+                        snackBarMessage(`A scanning error occurred: ${err}`)
+                    })
+                })
+            })
+        }
     })
 })
+
+// For each icon button with ripples
+$(".mdc-icon-button[data-mdc-auto-init='MDCRipple']").each((_, {
+    MDCRipple
+}) => {
+
+    // Fix ripples
+    MDCRipple.unbounded = true
+})
+
 
 import {
     autoInit
