@@ -256,8 +256,8 @@ const countFileLines = (filePath) => new Promise((resolve, reject) => {
 })
 
 const bestForBloom = (n, p) => {
-    m = Math.ceil((n * Math.log(p)) / Math.log(1 / (2 ** Math.log(2))))
-    k = Math.round((m / n) * Math.log(2))
+    const m = Math.ceil((n * Math.log(p)) / Math.log(1 / (2 ** Math.log(2))))
+    const k = Math.round((m / n) * Math.log(2))
     return [m, k]
 }
 
@@ -402,9 +402,14 @@ checkupdate(path.join(storage, "scanning", "hashlist.lzstring.json"), path.join(
 // Root directory
 // const scanDir = path.parse(process.cwd()).root
 
+// Temporary directory
+const tempdir = path.join(require("temp-dir"), "rosav")
+    
 // Home directory
+const scanDir = require("os").homedir()
 
 // Downloads directory
+const watchDir = path.resolve(require("downloads-folder")())
 
 document.querySelector(".scan--directory").MDCTextField.value = scanDir
 
@@ -449,10 +454,6 @@ manageSettings($(".settings--rtp"), "rtp")
 manageSettings($(".settings--recursive-scan"), "recursive-scan")
 manageSettings($(".settings--threat-handling"), "threat-handling")
 
-const watchDir = path.resolve(require("downloads-folder")())
-const scanDir = require("os").homedir()
-const tempdir = path.join(require("temp-dir"), "rosav")
-
 let watcher
 
 $(".settings--rtp").find(".mdc-switch__native-control").on("change", () => {
@@ -477,11 +478,7 @@ $(".settings--rtp").find(".mdc-switch__native-control").on("change", () => {
                 }
             })
             .on("error", (err) => {
-                if (err.code = "EPERM") {
-                    console.warn(`Not enough permissions provided to watch a directory. Please run ROS AV as an administrator (${err.message})`)
-                } else {
-                    snackBarMessage(`An real time protection error occurred: ${err}`)
-                }
+                console.warn(`Not enough permissions provided to watch a directory. Please run ROS AV as an administrator (${err.message})`)
             })
     } else if (watcher.close) watcher.close()
 })
