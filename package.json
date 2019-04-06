@@ -78,7 +78,7 @@
         "@material/top-app-bar": "^1.1.0",
         "bloomfilter": "^0.0.18",
         "chokidar": "^2.1.2",
-        "dayjs": "^1.8.9",
+        "dayjs": "^1.8.12",
         "downloads-folder": "^1.0.1",
         "electron-compilers": "^5.9.0",
         "electron-squirrel-startup": "^1.0.0",
