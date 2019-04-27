@@ -75,7 +75,7 @@
         "@material/tab-bar": "^1.1.0",
         "@material/tab-indicator": "^1.1.0",
         "@material/textfield": "^1.1.0",
-        "@material/top-app-bar": "^1.1.0",
+        "@material/top-app-bar": "^1.1.1",
         "bloomfilter": "^0.0.18",
         "chokidar": "^2.1.2",
         "dayjs": "^1.8.12",
