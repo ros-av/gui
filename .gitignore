@@ -3,8 +3,9 @@ dist/*
 out/*
 build/*
 
-# Created by https://www.gitignore.io/api/node,macos,linux,windows
-# Edit at https://www.gitignore.io/?templates=node,macos,linux,windows
+
+# Created by https://www.gitignore.io/api/node,linux,macos,windows
+# Edit at https://www.gitignore.io/?templates=node,linux,macos,windows
 
 ### Linux ###
 *~
@@ -56,6 +57,10 @@ logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
+
+# Diagnostic reports (https://nodejs.org/api/report.html)
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Runtime data
 pids
@@ -156,4 +161,4 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# End of https://www.gitignore.io/api/node,macos,linux,windows
+# End of https://www.gitignore.io/api/node,linux,macos,windows
