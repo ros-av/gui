@@ -7,6 +7,10 @@ import {
 
 const path = require("path")
 
+import {
+    enableLiveReload
+} from 'electron-compile';
+
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) { // eslint-disable-line global-require
     app.quit()
@@ -17,6 +21,8 @@ if (require("electron-squirrel-startup")) { // eslint-disable-line global-requir
 let mainWindow
 
 const createWindow = () => {
+
+    enableLiveReload();
     // Create the browser window.
     mainWindow = new BrowserWindow({
         width: 960,
@@ -47,18 +53,18 @@ const createWindow = () => {
     const tray = new Tray(path.join(__dirname, "icon.ico"))
 
     const contextMenu = Menu.buildFromTemplate([{
-        label: "Open ROS AV",
-        click() {
-            mainWindow.show()
+            label: "Open ROS AV",
+            click() {
+                mainWindow.show()
+            },
         },
-    },
-    {
-        label: "Quit ROS AV",
-        click() {
-            app.isQuiting = true
-            app.quit()
+        {
+            label: "Quit ROS AV",
+            click() {
+                app.isQuiting = true
+                app.quit()
+            },
         },
-    },
     ])
 
     tray.on("click", () => {
