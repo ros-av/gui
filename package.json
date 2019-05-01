@@ -78,7 +78,7 @@
         "@material/top-app-bar": "^2.0.0",
         "bloomfilter": "^0.0.18",
         "bluebird": "^3.5.4",
-        "chokidar": "^2.1.2",
+        "chokidar": "^3.0.0",
         "dayjs": "^1.8.13",
         "downloads-folder": "^1.0.1",
         "electron-compilers": "^5.9.0",
