@@ -70,7 +70,7 @@ const githubapi = request.defaults({
     },
 })
 
-const countFileLines = (filePath) => new Promise((resolve, reject) => {
+const countFileLines = filePath => new Promise((resolve, reject) => {
     let lineCount = 0
     fs.createReadStream(filePath)
         .on("data", (buffer) => {
@@ -82,13 +82,16 @@ const countFileLines = (filePath) => new Promise((resolve, reject) => {
             } while (idx !== -1)
         })
         .on("end", () => resolve(lineCount))
-        .on("error", reject)
+        .on("error", reject())
 })
 
 const bestForBloom = (n, p) => {
     const m = Math.ceil((n * Math.log(p)) / Math.log(1 / (2 ** Math.log(2))))
     const k = Math.round((m / n) * Math.log(2))
-    return [m, k]
+    return {
+        m: m,
+        k: k
+    }
 }
 
 export default {

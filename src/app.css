@@ -1,0 +1,64 @@
+:root {
+    --mdc-theme-primary: #3f51b5;
+    --mdc-theme-secondary: #f44336;
+    --mdc-theme-on-primary: #ffffff;
+    --mdc-theme-on-secondary: #ffffff;
+}
+
+.app {
+    width: 100%;
+}
+
+.main-content {
+    padding-left: 16px;
+}
+
+.tab {
+    margin-top: 16px;
+    margin-right: 16px;
+}
+
+.scan--start-container {
+    display: contents;
+}
+
+.mdc-icon-button--textfield {
+    margin: 4px;
+}
+
+.mdc-icon-button--list {
+    right: 0;
+    position: absolute;
+}
+
+.mdc-icon-button--list2 {
+    right: 48px;
+    position: absolute;
+}
+
+.scan--directory-helper,
+.scan--start-container {
+    display: none;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.mdc-top-app-bar {
+    background-color: #3949AB;
+    -webkit-user-select: none;
+    -webkit-app-region: drag;
+}
+
+.mdc-switch--label {
+    margin-left: 10px;
+}
+
+.mdc-tab--active .mdc-tab__icon {
+    fill: var(--mdc-theme-primary, #6200ee);
+}
+
+.app--progress {
+    position: absolute;
+}

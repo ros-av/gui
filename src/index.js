@@ -31,6 +31,7 @@ const createWindow = () => {
         webPreferences: {
             nodeIntegration: false,
             nodeIntegrationInWorker: false,
+            contextIsolation: false,
             preload: path.join(__dirname, "app-loader.js"),
         },
         frame: false,

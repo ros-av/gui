@@ -6,72 +6,7 @@
     <title>ROS AV</title>
     <link rel="stylesheet" href="..\node_modules\material-components-web\dist\material-components-web.min.css">
 
-    <style>
-        :root {
-            --mdc-theme-primary: #3f51b5;
-            --mdc-theme-secondary: #f44336;
-            --mdc-theme-on-primary: #ffffff;
-            --mdc-theme-on-secondary: #ffffff;
-        }
-
-        .app {
-            width: 100%;
-        }
-
-        .main-content {
-            padding-left: 16px;
-        }
-
-        .tab {
-            margin-top: 16px;
-            margin-right: 16px;
-        }
-
-        .scan--start-container {
-            display: contents;
-        }
-
-        .mdc-icon-button--textfield {
-            margin: 4px;
-        }
-
-        .mdc-icon-button--list {
-            right: 0;
-            position: absolute;
-        }
-
-        .mdc-icon-button--list2 {
-            right: 48px;
-            position: absolute;
-        }
-
-        .scan--directory-helper,
-        .scan--start-container {
-            display: none;
-        }
-
-        .full-width {
-            width: 100%;
-        }
-
-        .mdc-top-app-bar {
-            background-color: #3949AB;
-            -webkit-user-select: none;
-            -webkit-app-region: drag;
-        }
-
-        .mdc-switch--label {
-            margin-left: 10px;
-        }
-
-        .mdc-tab--active .mdc-tab__icon {
-            fill: var(--mdc-theme-primary, #6200ee);
-        }
-
-        .app--progress {
-            position: absolute;
-        }
-    </style>
+    <link rel="stylesheet" href="app.css">
 
     <link rel="stylesheet" href="..\node_modules\normalize.css\normalize.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
@@ -146,9 +81,9 @@
                         </button>
                         <button class="mdc-tab" @click="setActiveTab('reports')" role="tab" aria-selected="false" tabindex="-1">
                             <span class="mdc-tab__content">
-                                <svg class="mdc-tab__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                                <svg class="mdc-tab__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                                     <path fill="none" d="M0 0h24v24H0V0z" />
-                                    <path d="M21 4H3c-1.1 0-2 .9-2 2v13c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zM3 19V6h8v13H3zm18 0h-8V6h8v13zm-7-9.5h6V11h-6zm0 2.5h6v1.5h-6zm0 2.5h6V16h-6z" aria-hidden="true" />
+                                    <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12zM10 9h8v2h-8zm0 3h4v2h-4zm0-6h8v2h-8z" />
                                 </svg>
                                 <span class="mdc-tab__text-label">Reports</span>
                             </span>

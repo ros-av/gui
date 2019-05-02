@@ -1,3 +1,7 @@
+// setImmediate Polyfill
+const _setImmediate = setImmediate;
+process.once("loaded", () => global.setImmediate = _setImmediate);
+
 // Electron
 const electron = require("electron")
 
@@ -31,17 +35,27 @@ const db = new Store({
 
 import * as mdc from "material-components-web"
 
-// Root directory
-// const scanDir = path.parse(process.cwd()).root
+const dirs = {
+    rootdir: path.parse(process.cwd()).root, // Root directory
+    tempdir: path.join(require("temp-dir"), "rosav"), // Temporary directory
+    homedir: require("os").homedir(), // Home directory
+    downdir: path.resolve(require("downloads-folder")()), // Downloads directory
+    storedir: path.join((electron.app || electron.remote.app).getPath("appData"), "rosav") // Storage directory
+}
 
-// Temporary directory
-const tempdir = path.join(require("temp-dir"), "rosav")
+const files = {
+    hashlist: path.join(dirs.storedir, "scanning", "hashlist.lzstring.json"), // Hashlist file
+    lastmodified: path.join(dirs.storedir, "scanning", "lastmodified.txt"), // Last modified file
+    hashesparams: path.join(dirs.storedir, "scanning", "hashesparams.txt"), // Hashlist parameters file
+    hashtxt: path.join(dirs.tempdir, "hashlist.txt") // Temporary hashlist file
+}
 
-// Home directory
-const scanDir = require("os").homedir()
-
-// Downloads directory
-const watchDir = path.resolve(require("downloads-folder")())
+// Populate storage locations
+lib.populateDirectory(dirs.storedir)
+lib.populateDirectory(path.join(dirs.storedir, "scanning"))
+lib.populateDirectory(path.join(dirs.storedir, "quarantine"))
+lib.populateDirectory(path.join(dirs.storedir, "reports"))
+lib.populateDirectory(path.join(dirs.storedir, "plugins"))
 
 // Settings manager
 const manageSettings = (el, name) => {
@@ -98,62 +112,63 @@ const update = (hashes, hashesparams, lastmodified, temphashes) => {
         .on("error", err => self.emit("error", err))
         .on("progress", ({
             size,
-        }) => self.emit("progress", size.transferred / size.total / 2, 1.0))
+        }) => self.emit("progress", {
+            done: size.transferred / size.total / 2,
+            total: 1.0
+        }))
         .on("end", () => {
             lib.countFileLines(temphashes).then((fileLines) => {
-                    const bestFilter = lib.bestForBloom(
-                        fileLines, // Number of bits to allocate
-                        1e-10, // Number of hash functions (currently set at 1/1 billion)
-                    )
+                const bestFilter = lib.bestForBloom(
+                    fileLines, // Number of bits to allocate
+                    1e-10, // Number of hash functions (currently set at 1/1 billion)
+                )
 
-                    const hashes = new BloomFilter(
-                        bestFilter[0],
-                        bestFilter[1],
-                    )
+                const hashes = new BloomFilter(
+                    bestFilter.m,
+                    bestFilter.k,
+                )
 
-                    let done = 0
+                let done = 0
 
-                    // Line reader
-                    const hlr = new LineByLineReader(hashlist, {
-                        encoding: "utf8",
-                        skipEmptyLines: true,
-                    })
+                // Line reader
+                const hlr = new LineByLineReader(hashlist, {
+                    encoding: "utf8",
+                    skipEmptyLines: true,
+                })
 
-                    // Line reader error
-                    hlr.on("error", err => self.emit("error", err))
+                // Line reader error
+                hlr.on("error", err => self.emit("error", err))
 
-                    // New line from line reader
-                    hlr.on("line", line => {
-                        hashes.add(line)
-                        done++
-                        self.emit("progress", done / fileLines + 0.5, 1.0)
-                    })
+                // New line from line reader
+                hlr.on("line", line => {
+                    hashes.add(line)
+                    done++
+                    self.emit("progress", done / fileLines + 0.5, 1.0)
+                })
 
-                    // Line reader finished
-                    hlr.on("end", () => {
-                        fs.writeFile(hashes, lzjs.compress(JSON.stringify([].slice.call(hashes.buckets))), (err) => {
-                            if (err) reject(err)
-                            fs.writeFile(hashesparams, bestFilter[1].toString(), () => self.emit("end"))
-                        })
+                // Line reader finished
+                hlr.on("end", () => {
+                    fs.writeFile(hashes, lzjs.compress(JSON.stringify([].slice.call(hashes.buckets))), err => {
+                        if (err) reject(err)
+                        fs.writeFile(hashesparams, bestFilter[1].toString(), () => self.emit("end"))
                     })
                 })
-                .pipe(fs.createWriteStream(temphashes))
-        })
+            })
+
+        }).pipe(fs.createWriteStream(temphashes))
     return self
 }
 
 const checkupdate = (hashlist, lastmodified) => new Promise((resolve, reject) => {
     fs.access(hashlist, fs.constants.F_OK, err => {
-        if (err) {
-            resolve({
-                fileexists: false,
-                outofdate: true,
-            })
-        }
+        if (err) resolve({
+            fileexists: false,
+            outofdate: true,
+        })
         lib.githubapi("https://api.github.com/rate_limit", (err, _, {
             resources,
         }) => {
-            if (err) reject(new Error(err))
+            if (err) reject(err)
 
             // Check the quota limit
             if (resources.core.remaining === 0) {
@@ -169,20 +184,20 @@ const checkupdate = (hashlist, lastmodified) => new Promise((resolve, reject) =>
                 lib.githubapi("https://api.github.com/repos/Richienb/virusshare-hashes/commits/master", (err, _, {
                     commit,
                 }) => {
-                    if (err) reject(new Error(err))
+                    if (err) reject(err)
 
                     // Get download date of hashlist
-                    const current = dayjs(lastmodified)
+                    const saved = dayjs(lastmodified)
 
                     // Get latest commit date of hashlist
-                    const now = dayjs(commit.author.date, "YYYY-MM-DDTHH:MM:SSZ")
+                    const latest = dayjs(commit.author.date, "YYYY-MM-DDTHH:MM:SSZ")
 
-                    // Check if current is older than now
+                    // Check if the saved version is older than the latest
                     resolve({
                         quota: true,
                         fileexists: true,
                         reset: resources.core.reset,
-                        outofdate: current.isBefore(now),
+                        outofdate: saved.isBefore(latest),
                     })
                 })
             }
@@ -197,10 +212,13 @@ window.onload = () => {
         $(".scan--directory").get(0).MDCTextField.value = $(".scan--directory-helper").get(0).files[0].path
     )
 
-    // When the choose directory button is clicked activate directory chooser
-    $(".scan--directory-choose").click(() =>
-        $(".scan--directory-helper").click()
-    )
+    // When document finished loading
+    $(document).ready(() => {
+        // When the choose directory button is clicked activate directory chooser
+        $(".scan--directory-choose").click(() => $(".scan--directory-helper").click())
+
+        $(".scan--directory").get(0).MDCTextField.value = dirs.homedir
+    })
 
     // Define Vue app
     const app = new Vue({
@@ -226,8 +244,6 @@ window.onload = () => {
         MDCRipple,
     }) => MDCRipple.unbounded = true)
 
-    $(".scan--directory").get(0).MDCTextField.value = scanDir
-
     // If scan start triggered
     $(".scan--start").click(() => {
         if (!hashesLoaded) {
@@ -245,7 +261,7 @@ window.onload = () => {
                         onlyFiles: true,
                     }).then((files) => {
                         // Make progress bar determinate
-                        $(".app-progress").get(0).MDCLinearProgress.determinate = true
+                        $(".app--progress").get(0).MDCLinearProgress.determinate = true
 
                         // Start progressbar
                         total = files.length
@@ -255,8 +271,8 @@ window.onload = () => {
                             if (hashesLoaded) {
                                 scan(file, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {
                                     done++
-                                    $(".app-progress").get(0).MDCLinearProgress.value = done / total
-                                }, (err) => {
+                                    $(".app--progress").get(0).MDCLinearProgress.value = done / total
+                                }, err => {
                                     if (err) snackBarMessage(`A scanning error occurred: ${err}`)
                                 })
                             }
@@ -267,7 +283,7 @@ window.onload = () => {
                 fs.readdir(path.resolve($(".scan--directory").get(0).MDCTextField.value), (err, files) => {
                     if (err) snackBarMessage(`An error occurred: ${err}`)
 
-                    $(".app-progress").get(0).MDCLinearProgress.determinate = true
+                    $(".app--progress").get(0).MDCLinearProgress.determinate = true
 
                     // Start progressbar
                     total = files.length
@@ -278,7 +294,7 @@ window.onload = () => {
                         if (hashesLoaded) {
                             scan(file, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {
                                 done++
-                                $(".app-progress").get(0).MDCLinearProgress.value = done / total
+                                $(".app--progress").get(0).MDCLinearProgress.value = done / total
                             }, (err) => {
                                 snackBarMessage(`A scanning error occurred: ${err}`)
                             })
@@ -299,7 +315,7 @@ window.onload = () => {
 
     $(".settings--rtp").find(".mdc-switch__native-control").on("change", () => {
         if ($(".settings--rtp").get(0).MDCSwitch.checked) {
-            watcher = chokidar.watch(watchDir, {
+            watcher = chokidar.watch(dirs.watchdir, {
                 persistent: true,
             })
 
@@ -346,22 +362,6 @@ window.onload = () => {
         }
     }
 
-    // Set storage location
-    const storage = path.join((electron.app || electron.remote.app).getPath("appData"), "rosav")
-
-    // Populate storage locations
-    lib.populateDirectory(storage)
-    lib.populateDirectory(path.join(storage, "scanning"))
-    lib.populateDirectory(path.join(storage, "quarantine"))
-    lib.populateDirectory(path.join(storage, "reports"))
-    lib.populateDirectory(path.join(storage, "plugins"))
-
-    // Hash list
-    // let hashes = new BloomFilter(
-    //     1592401693, // Number of bits to allocate
-    //     33 // Number of hash functions
-    // )
-
     // If hashes have loaded
     let hashesLoaded = false
 
@@ -375,65 +375,90 @@ window.onload = () => {
                     fs.unlink(file, (err) => {
                         if (err) reject(err)
                         snackBarMessage(`${file} was identified as a threat and was deleted.`, 0.1)
+                        resolve({
+                            safe: false
+                        })
                     })
                 } else if (action === "quarantine") {
                     fs.rename(file, path.resolve(path.join(args.data, "quarantine"), path.basename(file)), (err) => {
                         if (err) reject(err)
                         snackBarMessage(`${file} was identified as a threat and was quarantined.`, 0.1)
-                        resolve()
+                        resolve({
+                            safe: false
+                        })
                     })
-                } else {
-                    resolve()
-                }
-            }
+                } else resolve({
+                    safe: false
+                })
+            } else resolve({
+                safe: true
+            })
         }, (err) => {
             reject(err)
         })
     })
 
-    checkupdate(path.join(storage, "scanning", "hashlist.lzstring.json"), path.join(storage, "scanning", "lastmodified.txt")).then(({
+    // Check for updates
+    checkupdate(files.hashlist, files.lastmodified).then(({
         outofdate
     }) => {
-        if (outofdate === false) {
-            lib.loadHashes(path.join(storage, "scanning", "hashlist.lzstring.json"), path.join(storage, "scanning", "hashesparams.txt")).then((out) => {
-                hashes = out
-            })
-        } else {
-            update(path.join(storage, "scanning", "hashlist.lzstring.json"), path.join(storage, "scanning", "hashesparams.txt"), path.join(storage, "scanning", "lastmodified.txt"), path.join(path.join(tempdir, "hashlist.txt")))
-                .on("progress", (done, total) => {
-                    // Make progress bar determinate
-                    $(".app-progress").get(0).MDCLinearProgress.determinate = true
+        // If not out of date load hashes
+        if (!outofdate) lib.loadHashes(files.hashlist, files.hashesparams).then(o => {
+            hashes = o
+            hashesLoaded = true
+        })
 
-                    // Make progress bar determinate
-                    $(".app-progress").get(0).MDCLinearProgress.value = done / total
+        // If out of date update hashes
+        else {
+            const u = update(files.hashlist, files.hashesparams, files.lastmodified, files.hashtxt)
+            // When progress occurred
+            u.on("progress", ({
+                done,
+                total
+            }) => {
+                console.log({
+                    done,
+                    total
                 })
-                .on("end", () => {
-                    lib.loadHashes().then((out) => {
-                        hashes = out
-                        hashesLoaded = true
-                    })
+                // Make progress bar determinate
+                $(".app--progress").get(0).MDCLinearProgress.determinate = true
+
+                // Make progress bar determinate
+                $(".app--progress").get(0).MDCLinearProgress.value = done / total
+            })
+            // When complete
+            u.on("end", () => {
+                // Load hashes
+                lib.loadHashes(files.hashlist, files.hashesparams).then(o => {
+                    hashes = o
+                    hashesLoaded = true
                 })
+            })
         }
     })
 
-    let total = 0
-    let done = 0
+    // let total = 0
+    // let done = 0
 
     // Execute plugins
-    fs.readdir(path.join(storage, "plugins"), (err, items) => {
+    fs.readdir(path.join(dirs.storedir, "plugins"), (err, items) => {
         if (err) snackBarMessage(`Failed to load plugins because ${err}`)
 
         // If no plugins installed
         if (!items) return
 
-        items.forEach((dir) => {
+        // For each item in directory
+        items.forEach(dir => {
+            // If it ends with js
             if (dir.endsWith(".js")) {
-                fs.readFile(path.join(storage, "plugins", dir), "utf8", (err, contents) => {
-                    if (err) {
-                        snackBarMessage(`Failed to load ${dir} because ${err}`)
-                    } else {
+                // Read the file contents
+                fs.readFile(path.join(dirs.storedir, "plugins", dir), "utf8", (err, contents) => {
+                    if (err) snackBarMessage(`Failed to load ${dir} because ${err}`)
+                    else {
                         try {
+                            // Self containing function
                             (() => {
+                                // Evaluate contents
                                 eval(contents)
                             })()
                         } catch (err) {
@@ -442,7 +467,9 @@ window.onload = () => {
                         snackBarMessage(`Successfully loaded ${dir}`)
                     }
                 })
-            }
+                // If CSS file was specified append it to the header
+            } else if (dir.endsWith(".css")) $("head").append(`<link rel="stylesheet" href="${dir}">`)
+            else snackBarMessage(`Unable to load ${dir}`)
         })
     })
 }
