@@ -1,6 +1,6 @@
 // setImmediate Polyfill
-const _setImmediate = setImmediate;
-process.once("loaded", () => global.setImmediate = _setImmediate);
+const _setImmediate = setImmediate
+process.once("loaded", () => global.setImmediate = _setImmediate)
 
 // Electron
 const electron = require("electron")
@@ -24,11 +24,11 @@ const fs = require("graceful-fs").gracefulify(require("fs"))
 
 const rprog = require("request-progress")
 
-const Promise = require("bluebird");
+const Promise = require("bluebird")
 
 import {
     EventEmitter
-} from 'events';
+} from "events"
 
 const Store = require("electron-store")
 const db = new Store({
@@ -90,11 +90,11 @@ const manageSettings = (el, name) => {
 
 const isJSON = str => {
     try {
-        JSON.parse(str);
+        JSON.parse(str)
     } catch (e) {
-        return false;
+        return false
     }
-    return true;
+    return true
 }
 
 const runFile = dir => new Promse((resolve, reject) => {
@@ -155,7 +155,7 @@ const update = (hashes, hashesparams, lastmodified, temphashes) => {
     })
 
     // Download hashlist
-    rprog(lib.request("https://media.githubusercontent.com/media/Richienb/virusshare-hashes/master/virushashes.txt").pipe(fs.createWriteStream(temphashes)))
+    rprog(lib.request("https://media.githubusercontent.com/media/Richienb/virusshare-hashes/master/virushashes.txt"))
         .on("error", err => self.emit("error", err))
         .on("progress", ({
             size,
@@ -163,45 +163,44 @@ const update = (hashes, hashesparams, lastmodified, temphashes) => {
             done: size.transferred / size.total / 2,
             total: 1.0
         }))
-        .on("end", () => lib.countFileLines(temphashes).then(fileLines => {
-                const bestFilter = lib.bestForBloom(
-                    fileLines, // Number of bits to allocate
-                    1e-10, // Number of hash functions (currently set at 1/1 billion)
-                )
+        .on("end", () => lib.countFileLines(temphashes).then(({lines}) => {
+            const bestFilter = lib.bestForBloom(
+                lines, // Number of bits to allocate
+                1e-10, // Number of hash functions (currently set at 1/1 billion)
+            )
 
-                const hashes = new BloomFilter(
-                    bestFilter.m,
-                    bestFilter.k,
-                )
+            const hashes = new BloomFilter(
+                bestFilter.m,
+                bestFilter.k,
+            )
 
-                let done = 0
+            let done = 0
 
-                // Line reader
-                const hlr = new LineByLineReader(hashlist, {
-                    encoding: "utf8",
-                    skipEmptyLines: true,
-                })
-
-                // Line reader error
-                hlr.on("error", err => self.emit("error", err))
-
-                // New line from line reader
-                hlr.on("line", line => {
-                    hashes.add(line)
-                    done++
-                    self.emit("progress", done / fileLines + 0.5, 1.0)
-                })
-
-                // Line reader finished
-                hlr.on("end", () => {
-                    fs.writeFile(hashes, lzjs.compress(JSON.stringify([].slice.call(hashes.buckets))), err => {
-                        if (err) reject(err)
-                        fs.writeFile(hashesparams, bestFilter[1].toString(), () => self.emit("end"))
-                    })
-                })
+            // Line reader
+            const hlr = new LineByLineReader(hashlist, {
+                encoding: "utf8",
+                skipEmptyLines: true,
             })
 
-        )
+            // Line reader error
+            hlr.on("error", err => self.emit("error", err))
+
+            // New line from line reader
+            hlr.on("line", line => {
+                hashes.add(line)
+                done++
+                self.emit("progress", done / lines + 0.5, 1.0)
+            })
+
+            // Line reader finished
+            hlr.on("end", () => {
+                fs.writeFile(hashes, lzjs.compress(JSON.stringify([].slice.call(hashes.buckets))), err => {
+                    if (err) reject(err)
+                    fs.writeFile(hashesparams, bestFilter[1].toString(), () => self.emit("end"))
+                })
+            })
+        }))
+        .pipe(fs.createWriteStream(temphashes))
     return self
 }
 
@@ -454,6 +453,7 @@ window.onload = () => {
         if (!outofdate) lib.loadHashes(files.hashlist, files.hashesparams).then(o => {
             hashes = o
             hashesLoaded = true
+            $(".app--progress").get(0).MDCLinearProgress.close()
         })
 
         // If out of date update hashes
@@ -464,10 +464,6 @@ window.onload = () => {
                 done,
                 total
             }) => {
-                console.log({
-                    done,
-                    total
-                })
                 // Make progress bar determinate
                 $(".app--progress").get(0).MDCLinearProgress.determinate = true
 
@@ -480,6 +476,7 @@ window.onload = () => {
                 lib.loadHashes(files.hashlist, files.hashesparams).then(o => {
                     hashes = o
                     hashesLoaded = true
+                    $(".app--progress").get(0).MDCLinearProgress.close()
                 })
             })
         }

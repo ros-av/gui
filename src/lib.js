@@ -43,12 +43,16 @@ const safe = (dir, hashes) => new Promise((resolve, reject) => {
     fs.lstat(path.resolve(dir), (err, stats) => {
         if (err) reject(err)
         // If path is a directory
-        if (stats.isDirectory()) resolve({safe: true})
+        if (stats.isDirectory()) resolve({
+            safe: true
+        })
         // Get the MD5 of a file
         md5file(path.resolve(dir), (err, hash) => {
             if (err) reject(err)
             // If the hash is in the list
-            resolve({safe: !hashes.mightContain(hash)})
+            resolve({
+                safe: !hashes.mightContain(hash)
+            })
         })
     })
 })
@@ -81,7 +85,7 @@ const countFileLines = filePath => new Promise((resolve, reject) => {
                 lineCount++
             } while (idx !== -1)
         })
-        .on("end", () => resolve(lineCount))
+        .on("end", () => resolve({lines: lineCount}))
         .on("error", reject())
 })
 

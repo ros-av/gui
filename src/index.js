@@ -5,13 +5,13 @@ import {
     BrowserWindow,
 } from "electron"
 
-require('update-electron-app')()
+require("update-electron-app")()
 
 const path = require("path")
 
 import {
     enableLiveReload
-} from 'electron-compile';
+} from "electron-compile";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) { // eslint-disable-line global-require
@@ -28,8 +28,8 @@ const createWindow = () => {
 
     // Create the browser window.
     mainWindow = new BrowserWindow({
-        width: 960,
-        height: 680,
+        width: 1280,
+        height: 720,
         icon: path.join(__dirname, "icon.ico"),
         webPreferences: {
             nodeIntegration: false,
@@ -37,17 +37,17 @@ const createWindow = () => {
             contextIsolation: false,
             preload: path.join(__dirname, "app-loader.js"),
         },
-        // frame: false,
+        frame: false,
     })
 
-    mainWindow.on("minimize", (event) => {
-        event.preventDefault()
+    mainWindow.on("minimize", ev => {
+        ev.preventDefault()
         mainWindow.hide()
     })
 
-    mainWindow.on("close", (event) => {
+    mainWindow.on("close", ev => {
         if (!app.isQuiting) {
-            event.preventDefault()
+            ev.preventDefault()
             mainWindow.hide()
         }
 
