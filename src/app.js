@@ -199,7 +199,7 @@ const update = (hashes, hashesparams, lastmodified, temphashes) => {
                     fs.writeFile(hashesparams, bestFilter[1].toString(), () => self.emit("end"))
                 })
             })
-        }))
+        }).catch(e => reject(e)))
         .pipe(fs.createWriteStream(temphashes))
     return self
 }
