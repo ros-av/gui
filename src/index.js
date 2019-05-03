@@ -5,6 +5,8 @@ import {
     BrowserWindow,
 } from "electron"
 
+require('update-electron-app')()
+
 const path = require("path")
 
 import {
@@ -23,6 +25,7 @@ let mainWindow
 const createWindow = () => {
 
     enableLiveReload();
+
     // Create the browser window.
     mainWindow = new BrowserWindow({
         width: 960,
@@ -34,7 +37,7 @@ const createWindow = () => {
             contextIsolation: false,
             preload: path.join(__dirname, "app-loader.js"),
         },
-        frame: false,
+        // frame: false,
     })
 
     mainWindow.on("minimize", (event) => {

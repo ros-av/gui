@@ -62,3 +62,15 @@
 .app--progress {
     position: absolute;
 }
+
+.tab__dashboard {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.main__icon {
+    height: 128px;
+    width: 128px;
+    margin-right: 16px;
+}

@@ -35,7 +35,7 @@
         <div class="mdc-tab-bar" role="tablist" data-mdc-auto-init="MDCTabBar">
             <div class="mdc-tab-scroller">
                 <div class="mdc-tab-scroller__scroll-area">
-                    <div class="mdc-tab-scroller__scroll-content">
+                    <nav class="mdc-tab-scroller__scroll-content">
                         <button class="mdc-tab mdc-tab--active" @click="setActiveTab('dashboard')" role="tab" aria-selected="true" tabindex="0">
                             <span class="mdc-tab__content">
                                 <svg class="mdc-tab__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
@@ -107,22 +107,27 @@
                             </span>
                             <span class="mdc-tab__ripple"></span>
                         </button>
-                    </div>
+                    </nav>
                 </div>
             </div>
         </div>
         <div class="main-content">
             <audio class="ping" src="ping.ogg"></audio>
-            <div class="tab" v-show="isActiveTab('dashboard')">
+            <main class="tab tab__dashboard" v-show="isActiveTab('dashboard')">
+                <img class="main__icon" src="icon.svg" alt="ROS AV Logo">
                 <h1 class="mdc-typography--headline3">Welcome. ROS AV is running.</h1>
-            </div>
-            <div class="tab" v-show="isActiveTab('scan')"><input type="file" class="scan--directory-helper" webkitdirectory />
-                <div class="scan--start-container"><button class="mdc-fab mdc-fab--extended scan--start" data-mdc-auto-init="MDCRipple">
+            </main>
+            <main class="tab" v-show="isActiveTab('scan')">
+                <input type="file" class="scan--directory-helper" webkitdirectory />
+                <div class="scan--start-container">
+                    <button class="mdc-fab mdc-fab--extended scan--start" data-mdc-auto-init="MDCRipple">
                         <svg class="mdc-fab__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                             <path fill="none" d="M0 0h24v24H0V0z" />
                             <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" /></svg>
                         <span class="mdc-fab__label">Start Scan</span>
-                    </button><br><br></div>
+                    </button>
+                    <br><br>
+                </div>
                 <p class="scan--loading">Loading hashes... (This may take a few minutes)</p>
                 <div class="mdc-text-field mdc-text-field--outlined scan--directory full-width" data-mdc-auto-init="MDCTextField">
                     <input type="text" id="tf-outlined-b" class="mdc-text-field__input">
@@ -138,8 +143,8 @@
                             <path fill="none" d="M0 0h24v24H0V0z" />
                             <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z" /></svg></button>
                 </div>
-            </div>
-            <div class="tab" v-show="isActiveTab('scanning')">
+            </main>
+            <main class="tab" v-show="isActiveTab('scanning')">
                 <button class="mdc-fab mdc-fab--extended" @click="setActiveTab('scanning')" data-mdc-auto-init="MDCRipple">
                     <svg class="mdc-fab__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                         <path fill="none" d="M0 0h24v24H0V0z" />
@@ -156,8 +161,8 @@
                         <span class="mdc-linear-progress__bar-inner"></span>
                     </div>
                 </div>
-            </div>
-            <div class="tab" v-show="isActiveTab('quarantine')">
+            </main>
+            <main class="tab" v-show="isActiveTab('quarantine')">
                 <ul class="mdc-list">
                     <li class="mdc-list-item" tabindex="0">
                         <span class="mdc-list-item__text">Single-line item</span>
@@ -174,8 +179,8 @@
                             </svg></button>
                     </li>
                 </ul>
-            </div>
-            <div class="tab" v-show="isActiveTab('reports')">
+            </main>
+            <main class="tab" v-show="isActiveTab('reports')">
                 <ul class="mdc-list">
                     <li class="mdc-list-item" tabindex="0">
                         <span class="mdc-list-item__text">Single-line item</span>
@@ -194,8 +199,8 @@
                             </svg></button>
                     </li>
                 </ul>
-            </div>
-            <div class="tab" v-show="isActiveTab('settings')">
+            </main>
+            <main class="tab" v-show="isActiveTab('settings')">
                 <div class="mdc-switch mdc-switch--checked settings--rtp" data-mdc-auto-init="MDCSwitch">
                     <div class="mdc-switch__track"></div>
                     <div class="mdc-switch__thumb-underlay">
@@ -272,7 +277,7 @@
                         <div class="mdc-notched-outline__trailing"></div>
                     </div>
                 </div>
-            </div>
+            </main>
         </div>
         <div class="mdc-snackbar mdc-snackbar--leading main--snackbar" data-mdc-auto-init="MDCSnackbar">
             <div class="mdc-snackbar__surface">

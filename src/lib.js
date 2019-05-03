@@ -43,12 +43,12 @@ const safe = (dir, hashes) => new Promise((resolve, reject) => {
     fs.lstat(path.resolve(dir), (err, stats) => {
         if (err) reject(err)
         // If path is a directory
-        if (stats.isDirectory()) resolve(true)
+        if (stats.isDirectory()) resolve({safe: true})
         // Get the MD5 of a file
         md5file(path.resolve(dir), (err, hash) => {
             if (err) reject(err)
             // If the hash is in the list
-            resolve(!hashes.mightContain(hash))
+            resolve({safe: !hashes.mightContain(hash)})
         })
     })
 })

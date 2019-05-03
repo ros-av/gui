@@ -24,6 +24,8 @@ const fs = require("graceful-fs").gracefulify(require("fs"))
 
 const rprog = require("request-progress")
 
+const Promise = require("bluebird");
+
 import {
     EventEmitter
 } from 'events';
@@ -56,6 +58,7 @@ lib.populateDirectory(path.join(dirs.storedir, "scanning"))
 lib.populateDirectory(path.join(dirs.storedir, "quarantine"))
 lib.populateDirectory(path.join(dirs.storedir, "reports"))
 lib.populateDirectory(path.join(dirs.storedir, "plugins"))
+lib.populateDirectory(dirs.tempdir)
 
 // Settings manager
 const manageSettings = (el, name) => {
@@ -94,6 +97,50 @@ const isJSON = str => {
     return true;
 }
 
+const runFile = dir => new Promse((resolve, reject) => {
+    // Read the file contents
+    fs.readFile(dir, (err, contents) => {
+        if (err) reject(err)
+        else {
+            try {
+                // Self containing function
+                (() => {
+                    // Evaluate contents
+                    eval(contents)
+                })()
+            } catch (err) {
+                reject(err)
+            }
+            resolve()
+        }
+    })
+})
+
+const runPlugin = dir => new Promise((resolve, reject) => {
+    // Get path stats
+    fs.stat(dir, (err, stats) => {
+        if (err) reject(err)
+
+        // Get path extension
+        const ext = dir.split(".")[0]
+
+        // If path is directory run index.js file inside of the directory
+        if (stats.isDirectory()) runFile(path.join(dir, "index.js")).then(resolve).catch(reject)
+
+        // If extension is JS run it
+        else if (ext === "js") runFile(dir).then(resolve).catch(reject)
+
+        // If extension is CSS run it
+        else if (ext === "css") {
+            $("head").append(`<link rel="stylesheet" href="${dir}">`)
+            resolve()
+        }
+
+        // If unknown reject
+        else reject(TypeError("Only JS files, directories with JS files and CSS file allowed!"))
+    })
+})
+
 const update = (hashes, hashesparams, lastmodified, temphashes) => {
     const self = new EventEmitter()
 
@@ -108,7 +155,7 @@ const update = (hashes, hashesparams, lastmodified, temphashes) => {
     })
 
     // Download hashlist
-    rprog(lib.request("https://media.githubusercontent.com/media/Richienb/virusshare-hashes/master/virushashes.txt"))
+    rprog(lib.request("https://media.githubusercontent.com/media/Richienb/virusshare-hashes/master/virushashes.txt").pipe(fs.createWriteStream(temphashes)))
         .on("error", err => self.emit("error", err))
         .on("progress", ({
             size,
@@ -116,8 +163,7 @@ const update = (hashes, hashesparams, lastmodified, temphashes) => {
             done: size.transferred / size.total / 2,
             total: 1.0
         }))
-        .on("end", () => {
-            lib.countFileLines(temphashes).then((fileLines) => {
+        .on("end", () => lib.countFileLines(temphashes).then(fileLines => {
                 const bestFilter = lib.bestForBloom(
                     fileLines, // Number of bits to allocate
                     1e-10, // Number of hash functions (currently set at 1/1 billion)
@@ -155,7 +201,7 @@ const update = (hashes, hashesparams, lastmodified, temphashes) => {
                 })
             })
 
-        }).pipe(fs.createWriteStream(temphashes))
+        )
     return self
 }
 
@@ -271,7 +317,7 @@ window.onload = () => {
                             if (hashesLoaded) {
                                 scan(file, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {
                                     done++
-                                    $(".app--progress").get(0).MDCLinearProgress.value = done / total
+                                    $(".app--progress").get(0).MDCLinearProgress.progress = done / total
                                 }, err => {
                                     if (err) snackBarMessage(`A scanning error occurred: ${err}`)
                                 })
@@ -294,7 +340,7 @@ window.onload = () => {
                         if (hashesLoaded) {
                             scan(file, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {
                                 done++
-                                $(".app--progress").get(0).MDCLinearProgress.value = done / total
+                                $(".app--progress").get(0).MDCLinearProgress.progress = done / total
                             }, (err) => {
                                 snackBarMessage(`A scanning error occurred: ${err}`)
                             })
@@ -368,11 +414,15 @@ window.onload = () => {
     let hashes
 
     const scan = (dir, action) => new Promise((resolve, reject) => {
-        lib.safe(dir, hashes).then((isSafe) => {
-            if (!isSafe) {
+        // Check if file is safe
+        lib.safe(dir, hashes).then(({
+            safe
+        }) => {
+
+            if (!safe) {
                 if (action === "remove") {
                     // Delete the file
-                    fs.unlink(file, (err) => {
+                    fs.unlink(file, err => {
                         if (err) reject(err)
                         snackBarMessage(`${file} was identified as a threat and was deleted.`, 0.1)
                         resolve({
@@ -380,7 +430,7 @@ window.onload = () => {
                         })
                     })
                 } else if (action === "quarantine") {
-                    fs.rename(file, path.resolve(path.join(args.data, "quarantine"), path.basename(file)), (err) => {
+                    fs.rename(file, path.resolve(path.join(args.data, "quarantine"), path.basename(file)), err => {
                         if (err) reject(err)
                         snackBarMessage(`${file} was identified as a threat and was quarantined.`, 0.1)
                         resolve({
@@ -393,9 +443,7 @@ window.onload = () => {
             } else resolve({
                 safe: true
             })
-        }, (err) => {
-            reject(err)
-        })
+        }).catch(reject)
     })
 
     // Check for updates
@@ -424,7 +472,7 @@ window.onload = () => {
                 $(".app--progress").get(0).MDCLinearProgress.determinate = true
 
                 // Make progress bar determinate
-                $(".app--progress").get(0).MDCLinearProgress.value = done / total
+                $(".app--progress").get(0).MDCLinearProgress.progress = done / total
             })
             // When complete
             u.on("end", () => {
@@ -437,9 +485,6 @@ window.onload = () => {
         }
     })
 
-    // let total = 0
-    // let done = 0
-
     // Execute plugins
     fs.readdir(path.join(dirs.storedir, "plugins"), (err, items) => {
         if (err) snackBarMessage(`Failed to load plugins because ${err}`)
@@ -448,28 +493,9 @@ window.onload = () => {
         if (!items) return
 
         // For each item in directory
-        items.forEach(dir => {
-            // If it ends with js
-            if (dir.endsWith(".js")) {
-                // Read the file contents
-                fs.readFile(path.join(dirs.storedir, "plugins", dir), "utf8", (err, contents) => {
-                    if (err) snackBarMessage(`Failed to load ${dir} because ${err}`)
-                    else {
-                        try {
-                            // Self containing function
-                            (() => {
-                                // Evaluate contents
-                                eval(contents)
-                            })()
-                        } catch (err) {
-                            snackBarMessage(`Failed to load ${dir} because ${err}`)
-                        }
-                        snackBarMessage(`Successfully loaded ${dir}`)
-                    }
-                })
-                // If CSS file was specified append it to the header
-            } else if (dir.endsWith(".css")) $("head").append(`<link rel="stylesheet" href="${dir}">`)
-            else snackBarMessage(`Unable to load ${dir}`)
-        })
+        items.forEach(dir =>
+            runPlugin(path.join(dirs.storedir, "plugins", dir))
+            .then(() => snackBarMessage(`Successfully loaded ${dir}`))
+            .catch(err => snackBarMessage(`Failed to load ${dir} because ${err}`)))
     })
 }
