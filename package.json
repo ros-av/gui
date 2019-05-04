@@ -79,6 +79,7 @@
         "bloomfilter": "^0.0.18",
         "bluebird": "^3.5.4",
         "chokidar": "^3.0.0",
+        "count-lines-in-file": "^1.1.0",
         "dayjs": "^1.8.13",
         "downloads-folder": "^1.0.1",
         "electron-compilers": "^5.9.0",

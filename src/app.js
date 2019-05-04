@@ -7,6 +7,11 @@ const electron = require("electron")
 
 require("electron-compile/lib/initialize-renderer").initializeRendererProcess(electron.remote.getGlobal("globalCompilerHost").readOnlyMode)
 
+// Bloom filter
+import {
+    BloomFilter
+} from "bloomfilter"
+
 import lib from "./lib"
 
 import * as lzjs from "lzjs"
@@ -26,8 +31,12 @@ const rprog = require("request-progress")
 
 const Promise = require("bluebird")
 
+const countFileLines = Promise.promisify(require("count-lines-in-file"))
+
+import * as LineByLineReader from "line-by-line"
+
 import {
-    EventEmitter
+    EventEmitter,
 } from "events"
 
 const Store = require("electron-store")
@@ -42,14 +51,14 @@ const dirs = {
     tempdir: path.join(require("temp-dir"), "rosav"), // Temporary directory
     homedir: require("os").homedir(), // Home directory
     downdir: path.resolve(require("downloads-folder")()), // Downloads directory
-    storedir: path.join((electron.app || electron.remote.app).getPath("appData"), "rosav") // Storage directory
+    storedir: path.join((electron.app || electron.remote.app).getPath("appData"), "rosav"), // Storage directory
 }
 
 const files = {
     hashlist: path.join(dirs.storedir, "scanning", "hashlist.lzstring.json"), // Hashlist file
     lastmodified: path.join(dirs.storedir, "scanning", "lastmodified.txt"), // Last modified file
     hashesparams: path.join(dirs.storedir, "scanning", "hashesparams.txt"), // Hashlist parameters file
-    hashtxt: path.join(dirs.tempdir, "hashlist.txt") // Temporary hashlist file
+    hashtxt: path.join(dirs.tempdir, "hashlist.txt"), // Temporary hashlist file
 }
 
 // Populate storage locations
@@ -61,7 +70,7 @@ lib.populateDirectory(path.join(dirs.storedir, "plugins"))
 lib.populateDirectory(dirs.tempdir)
 
 // Settings manager
-const manageSettings = (el, name) => {
+const manageSettings = async (el, name) => {
     if (el.hasClass("mdc-select")) {
         const mdcSelect = el.get(0).MDCSelect
         const val = db.get(name)
@@ -88,7 +97,7 @@ const manageSettings = (el, name) => {
     }
 }
 
-const isJSON = str => {
+const isJSON = (str) => {
     try {
         JSON.parse(str)
     } catch (e) {
@@ -97,7 +106,7 @@ const isJSON = str => {
     return true
 }
 
-const runFile = dir => new Promse((resolve, reject) => {
+const runFile = (dir) => new Promse((resolve, reject) => {
     // Read the file contents
     fs.readFile(dir, (err, contents) => {
         if (err) reject(err)
@@ -116,7 +125,7 @@ const runFile = dir => new Promse((resolve, reject) => {
     })
 })
 
-const runPlugin = dir => new Promise((resolve, reject) => {
+const runPlugin = (dir) => new Promise((resolve, reject) => {
     // Get path stats
     fs.stat(dir, (err, stats) => {
         if (err) reject(err)
@@ -137,7 +146,7 @@ const runPlugin = dir => new Promise((resolve, reject) => {
         }
 
         // If unknown reject
-        else reject(TypeError("Only JS files, directories with JS files and CSS file allowed!"))
+        else reject(new TypeError("Only JS files, directories with JS files and CSS file allowed!"))
     })
 })
 
@@ -156,14 +165,16 @@ const update = (hashes, hashesparams, lastmodified, temphashes) => {
 
     // Download hashlist
     rprog(lib.request("https://media.githubusercontent.com/media/Richienb/virusshare-hashes/master/virushashes.txt"))
-        .on("error", err => self.emit("error", err))
+        .on("error", (err) => self.emit("error", err))
         .on("progress", ({
             size,
         }) => self.emit("progress", {
             done: size.transferred / size.total / 2,
-            total: 1.0
+            total: 1.0,
         }))
-        .on("end", () => lib.countFileLines(temphashes).then(({lines}) => {
+        .on("end", () => countFileLines(temphashes).then(({
+            lines,
+        }) => {
             const bestFilter = lib.bestForBloom(
                 lines, // Number of bits to allocate
                 1e-10, // Number of hash functions (currently set at 1/1 billion)
@@ -183,10 +194,10 @@ const update = (hashes, hashesparams, lastmodified, temphashes) => {
             })
 
             // Line reader error
-            hlr.on("error", err => self.emit("error", err))
+            hlr.on("error", (err) => self.emit("error", err))
 
             // New line from line reader
-            hlr.on("line", line => {
+            hlr.on("line", (line) => {
                 hashes.add(line)
                 done++
                 self.emit("progress", done / lines + 0.5, 1.0)
@@ -194,22 +205,24 @@ const update = (hashes, hashesparams, lastmodified, temphashes) => {
 
             // Line reader finished
             hlr.on("end", () => {
-                fs.writeFile(hashes, lzjs.compress(JSON.stringify([].slice.call(hashes.buckets))), err => {
+                fs.writeFile(hashes, lzjs.compress(JSON.stringify([].slice.call(hashes.buckets))), (err) => {
                     if (err) reject(err)
                     fs.writeFile(hashesparams, bestFilter[1].toString(), () => self.emit("end"))
                 })
             })
-        }).catch(e => reject(e)))
+        }).catch((e) => console.error(e)))
         .pipe(fs.createWriteStream(temphashes))
     return self
 }
 
 const checkupdate = (hashlist, lastmodified) => new Promise((resolve, reject) => {
-    fs.access(hashlist, fs.constants.F_OK, err => {
-        if (err) resolve({
-            fileexists: false,
-            outofdate: true,
-        })
+    fs.access(hashlist, fs.constants.F_OK, (err) => {
+        if (err) {
+            resolve({
+                fileexists: false,
+                outofdate: true,
+            })
+        }
         lib.githubapi("https://api.github.com/rate_limit", (err, _, {
             resources,
         }) => {
@@ -285,7 +298,7 @@ window.onload = () => {
     mdc.autoInit()
 
     // Fix the ripples of each icon button
-    $(`.mdc-icon-button[data-mdc-auto-init="MDCRipple"]`).each((_, {
+    $(".mdc-icon-button[data-mdc-auto-init=\"MDCRipple\"]").each((_, {
         MDCRipple,
     }) => MDCRipple.unbounded = true)
 
@@ -317,7 +330,7 @@ window.onload = () => {
                                 scan(file, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {
                                     done++
                                     $(".app--progress").get(0).MDCLinearProgress.progress = done / total
-                                }, err => {
+                                }, (err) => {
                                     if (err) snackBarMessage(`A scanning error occurred: ${err}`)
                                 })
                             }
@@ -382,7 +395,7 @@ window.onload = () => {
                 .on("error", (err) => {
                     console.warn(`Not enough permissions provided to watch a directory. Please run ROS AV as an administrator (${err.message})`)
                 })
-        } else if (watcher.close) watcher.close()
+        } else if (watcher) watcher.close()
     })
 
     $(".settings--rtp").find(".mdc-switch__native-control").trigger("change")
@@ -415,46 +428,51 @@ window.onload = () => {
     const scan = (dir, action) => new Promise((resolve, reject) => {
         // Check if file is safe
         lib.safe(dir, hashes).then(({
-            safe
+            safe,
         }) => {
-
             if (!safe) {
                 if (action === "remove") {
                     // Delete the file
-                    fs.unlink(file, err => {
+                    fs.unlink(file, (err) => {
                         if (err) reject(err)
                         snackBarMessage(`${file} was identified as a threat and was deleted.`, 0.1)
                         resolve({
-                            safe: false
+                            safe: false,
                         })
                     })
                 } else if (action === "quarantine") {
-                    fs.rename(file, path.resolve(path.join(args.data, "quarantine"), path.basename(file)), err => {
+                    fs.rename(file, path.resolve(args.data, "quarantine", path.basename(file)), (err) => {
                         if (err) reject(err)
                         snackBarMessage(`${file} was identified as a threat and was quarantined.`, 0.1)
                         resolve({
-                            safe: false
+                            safe: false,
                         })
                     })
-                } else resolve({
-                    safe: false
+                } else {
+                    resolve({
+                        safe: false,
+                    })
+                }
+            } else {
+                resolve({
+                    safe: true,
                 })
-            } else resolve({
-                safe: true
-            })
+            }
         }).catch(reject)
     })
 
     // Check for updates
     checkupdate(files.hashlist, files.lastmodified).then(({
-        outofdate
+        outofdate,
     }) => {
         // If not out of date load hashes
-        if (!outofdate) lib.loadHashes(files.hashlist, files.hashesparams).then(o => {
-            hashes = o
-            hashesLoaded = true
-            $(".app--progress").get(0).MDCLinearProgress.close()
-        })
+        if (!outofdate) {
+            lib.loadHashes(files.hashlist, files.hashesparams).then((o) => {
+                hashes = o
+                hashesLoaded = true
+                $(".app--progress").get(0).MDCLinearProgress.close()
+            })
+        }
 
         // If out of date update hashes
         else {
@@ -462,7 +480,7 @@ window.onload = () => {
             // When progress occurred
             u.on("progress", ({
                 done,
-                total
+                total,
             }) => {
                 // Make progress bar determinate
                 $(".app--progress").get(0).MDCLinearProgress.determinate = true
@@ -473,7 +491,7 @@ window.onload = () => {
             // When complete
             u.on("end", () => {
                 // Load hashes
-                lib.loadHashes(files.hashlist, files.hashesparams).then(o => {
+                lib.loadHashes(files.hashlist, files.hashesparams).then((o) => {
                     hashes = o
                     hashesLoaded = true
                     $(".app--progress").get(0).MDCLinearProgress.close()
@@ -490,9 +508,9 @@ window.onload = () => {
         if (!items) return
 
         // For each item in directory
-        items.forEach(dir =>
+        items.forEach((dir) =>
             runPlugin(path.join(dirs.storedir, "plugins", dir))
             .then(() => snackBarMessage(`Successfully loaded ${dir}`))
-            .catch(err => snackBarMessage(`Failed to load ${dir} because ${err}`)))
+            .catch((err) => snackBarMessage(`Failed to load ${dir} because ${err}`)))
     })
 }

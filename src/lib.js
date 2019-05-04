@@ -1,5 +1,5 @@
 // Improved promises
-const Promise = require("bluebird");
+const Promise = require("bluebird")
 
 // Improved filesystem functions
 const fs = require("graceful-fs").gracefulify(require("fs"))
@@ -11,7 +11,9 @@ import * as path from "path"
 import * as firstline from "firstline"
 
 // Bloom filter
-import * as BloomFilter from "bloomfilter"
+import {
+    BloomFilter
+} from "bloomfilter"
 
 // MD5 File
 import * as md5file from "md5-file"
@@ -43,15 +45,17 @@ const safe = (dir, hashes) => new Promise((resolve, reject) => {
     fs.lstat(path.resolve(dir), (err, stats) => {
         if (err) reject(err)
         // If path is a directory
-        if (stats.isDirectory()) resolve({
-            safe: true
-        })
+        if (stats.isDirectory()) {
+            resolve({
+                safe: true,
+            })
+        }
         // Get the MD5 of a file
         md5file(path.resolve(dir), (err, hash) => {
             if (err) reject(err)
             // If the hash is in the list
             resolve({
-                safe: !hashes.mightContain(hash)
+                safe: !hashes.mightContain(hash),
             })
         })
     })
@@ -74,27 +78,12 @@ const githubapi = request.defaults({
     },
 })
 
-const countFileLines = filePath => new Promise((resolve, reject) => {
-    let lineCount = 0
-    fs.createReadStream(filePath)
-        .on("data", (buffer) => {
-            let idx = -1
-            lineCount--
-            do {
-                idx = buffer.indexOf(10, idx + 1)
-                lineCount++
-            } while (idx !== -1)
-        })
-        .on("end", () => resolve({lines: lineCount}))
-        .on("error", reject())
-})
-
 const bestForBloom = (n, p) => {
     const m = Math.ceil((n * Math.log(p)) / Math.log(1 / (2 ** Math.log(2))))
     const k = Math.round((m / n) * Math.log(2))
     return {
-        m: m,
-        k: k
+        m,
+        k
     }
 }
 
@@ -105,6 +94,5 @@ export default {
     userAgent,
     request,
     githubapi,
-    countFileLines,
     bestForBloom,
 }
