@@ -29,17 +29,19 @@ const fs = require("graceful-fs").gracefulify(require("fs"))
 
 const rprog = require("request-progress")
 
-const Promise = require("bluebird")
+import {
+    Promise
+} from "bluebird"
 
 const countFileLines = Promise.promisify(require("count-lines-in-file"))
 
-import * as LineByLineReader from "line-by-line"
+import LineByLineReader from "line-by-line"
 
 import {
     EventEmitter,
 } from "events"
 
-const Store = require("electron-store")
+import Store from "electron-store"
 const db = new Store({
     cwd: "settings",
 })
@@ -106,7 +108,7 @@ const isJSON = (str) => {
     return true
 }
 
-const runFile = (dir) => new Promse((resolve, reject) => {
+const runFile = (dir) => new Promise((resolve, reject) => {
     // Read the file contents
     fs.readFile(dir, (err, contents) => {
         if (err) reject(err)

@@ -5,6 +5,13 @@ import {
     BrowserWindow,
 } from "electron"
 
+import AutoLaunch from "auto-launch"
+
+new AutoLaunch({
+    name: "ROS AV",
+    isHidden: true
+}).enable();
+
 require("update-electron-app")()
 
 const path = require("path")
@@ -21,6 +28,7 @@ if (require("electron-squirrel-startup")) { // eslint-disable-line global-requir
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
+const startMinimized = (process.argv || []).indexOf('--hidden') !== -1;
 
 const createWindow = () => {
     enableLiveReload()
@@ -39,12 +47,14 @@ const createWindow = () => {
         frame: false,
     })
 
-    mainWindow.on("minimize", (ev) => {
+    if (startMinimized === true) mainWindow.hide()
+
+    mainWindow.on("minimize", ev => {
         ev.preventDefault()
         mainWindow.hide()
     })
 
-    mainWindow.on("close", (ev) => {
+    mainWindow.on("close", ev => {
         if (!app.isQuiting) {
             ev.preventDefault()
             mainWindow.hide()
@@ -56,23 +66,21 @@ const createWindow = () => {
     const tray = new Tray(path.join(__dirname, "icon.ico"))
 
     const contextMenu = Menu.buildFromTemplate([{
-        label: "Open ROS AV",
-        click() {
-            mainWindow.show()
+            label: "Open ROS AV",
+            click() {
+                mainWindow.show()
+            },
         },
-    },
-    {
-        label: "Quit ROS AV",
-        click() {
-            app.isQuiting = true
-            app.quit()
+        {
+            label: "Quit ROS AV",
+            click() {
+                app.isQuiting = true
+                app.quit()
+            },
         },
-    },
     ])
 
-    tray.on("click", () => {
-        tray.popUpContextMenu()
-    })
+    tray.on("click", () => tray.popUpContextMenu())
 
     tray.setToolTip("ROS AV")
     tray.setContextMenu(contextMenu)
