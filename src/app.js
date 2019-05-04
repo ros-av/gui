@@ -188,16 +188,16 @@ const update = (hashes, hashesparams, lastmodified, temphashes) => {
             let done = 0
 
             // Line reader
-            const hlr = new LineByLineReader(hashlist, {
+            const hlr = new LineByLineReader(hashes, {
                 encoding: "utf8",
                 skipEmptyLines: true,
             })
 
             // Line reader error
-            hlr.on("error", (err) => self.emit("error", err))
+            hlr.on("error", err => self.emit("error", err))
 
             // New line from line reader
-            hlr.on("line", (line) => {
+            hlr.on("line", line => {
                 hashes.add(line)
                 done++
                 self.emit("progress", done / lines + 0.5, 1.0)
