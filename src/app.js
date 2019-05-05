@@ -7,6 +7,8 @@ const electron = require("electron")
 
 require("electron-compile/lib/initialize-renderer").initializeRendererProcess(electron.remote.getGlobal("globalCompilerHost").readOnlyMode)
 
+const mainWindow = electron.remote.getCurrentWindow()
+
 // Bloom filter
 import {
     BloomFilter
@@ -210,7 +212,7 @@ const update = (hashlist, hashesparams, lastmodified, temphashes) => {
                     fs.writeFile(hashesparams, bestFilter[1].toString(), () => self.emit("end"))
                 })
             })
-        }).catch(err => console.error(err)))
+        }).catch(err => self.emit("progress", err)))
         .pipe(fs.createWriteStream(temphashes))
     return self
 }
@@ -299,6 +301,19 @@ window.onload = () => {
     $(".mdc-icon-button[data-mdc-auto-init=\"MDCRipple\"]").each((_, {
         MDCRipple,
     }) => MDCRipple.unbounded = true)
+
+    // Setup window actions
+    $(".bar__close").click(() => mainWindow.hide())
+    $(".bar__max").click(() => {
+        if (mainWindow.isMaximized()) {
+            mainWindow.unmaximize()
+            $(".bar__max svg").html(`<path d="M4,4H20V20H4V4M6,8V18H18V8H6Z" />`)
+        } else {
+            mainWindow.maximize()
+            $(".bar__max svg").html(`<path d="M4,8H8V4H20V16H16V20H4V8M16,8V14H18V6H10V8H16M6,12V18H14V12H6Z" />`)
+        }
+    })
+    $(".bar__min").click(() => mainWindow.minimize())
 
     // If scan start triggered
     $(".scan--start").click(() => {
@@ -456,7 +471,7 @@ window.onload = () => {
                     safe: true,
                 })
             }
-        }).catch(e => console.error(e))
+        }).catch(e => reject(e))
     })
 
     // Check for updates

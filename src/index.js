@@ -45,14 +45,12 @@ const createWindow = () => {
             preload: path.join(__dirname, "app-loader.js"),
         },
         frame: false,
+        show: false,
     })
 
     if (startMinimized === true) mainWindow.hide()
 
-    mainWindow.on("minimize", ev => {
-        ev.preventDefault()
-        mainWindow.hide()
-    })
+    mainWindow.once('ready-to-show', () => mainWindow.show())
 
     mainWindow.on("close", ev => {
         if (!app.isQuiting) {

@@ -71,6 +71,11 @@
 
 .mdc-top-app-bar__row {
     -webkit-app-region: drag;
+    -webkit-user-select: none;
+}
+
+.mdc-top-app-bar__action-item--unbounded {
+    -webkit-app-region: no-drag;
 }
 
 .main__icon {
