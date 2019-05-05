@@ -47,8 +47,8 @@
 
 .mdc-top-app-bar {
     background-color: #3949AB;
-    -webkit-user-select: none;
-    -webkit-app-region: drag;
+    /* -webkit-user-select: none; */
+    /* -webkit-app-region: drag; */
 }
 
 .mdc-switch--label {
@@ -67,6 +67,10 @@
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.mdc-top-app-bar__row {
+    -webkit-app-region: drag;
 }
 
 .main__icon {

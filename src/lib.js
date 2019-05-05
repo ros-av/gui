@@ -21,7 +21,7 @@ import * as md5file from "md5-file"
 // LZString
 import * as lzjs from "lzjs"
 
-const populateDirectory = (dir) => new Promise((resolve, reject) =>
+const populateDirectory = dir => new Promise((resolve, reject) =>
     fs.access(dir, fs.constants.F_OK, (err) => {
         if (err) {
             fs.mkdir(dir, {

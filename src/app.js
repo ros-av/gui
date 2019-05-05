@@ -152,7 +152,7 @@ const runPlugin = (dir) => new Promise((resolve, reject) => {
     })
 })
 
-const update = (hashes, hashesparams, lastmodified, temphashes) => {
+const update = (hashlist, hashesparams, lastmodified, temphashes) => {
     const self = new EventEmitter()
 
     // Download latest commit date of hash list
@@ -174,9 +174,7 @@ const update = (hashes, hashesparams, lastmodified, temphashes) => {
             done: size.transferred / size.total / 2,
             total: 1.0,
         }))
-        .on("end", () => countFileLines(temphashes).then(({
-            lines,
-        }) => {
+        .on("end", () => countFileLines(temphashes).then(lines => {
             const bestFilter = lib.bestForBloom(
                 lines, // Number of bits to allocate
                 1e-10, // Number of hash functions (currently set at 1/1 billion)
@@ -190,7 +188,7 @@ const update = (hashes, hashesparams, lastmodified, temphashes) => {
             let done = 0
 
             // Line reader
-            const hlr = new LineByLineReader(hashes, {
+            const hlr = new LineByLineReader(temphashes, {
                 encoding: "utf8",
                 skipEmptyLines: true,
             })
@@ -207,24 +205,22 @@ const update = (hashes, hashesparams, lastmodified, temphashes) => {
 
             // Line reader finished
             hlr.on("end", () => {
-                fs.writeFile(hashes, lzjs.compress(JSON.stringify([].slice.call(hashes.buckets))), (err) => {
+                fs.writeFile(hashlist, lzjs.compress(JSON.stringify([].slice.call(hashes.buckets))), err => {
                     if (err) reject(err)
                     fs.writeFile(hashesparams, bestFilter[1].toString(), () => self.emit("end"))
                 })
             })
-        }).catch((e) => console.error(e)))
+        }).catch(err => console.error(err)))
         .pipe(fs.createWriteStream(temphashes))
     return self
 }
 
 const checkupdate = (hashlist, lastmodified) => new Promise((resolve, reject) => {
     fs.access(hashlist, fs.constants.F_OK, (err) => {
-        if (err) {
-            resolve({
-                fileexists: false,
-                outofdate: true,
-            })
-        }
+        if (err) resolve({
+            fileexists: false,
+            outofdate: true,
+        })
         lib.githubapi("https://api.github.com/rate_limit", (err, _, {
             resources,
         }) => {
@@ -460,7 +456,7 @@ window.onload = () => {
                     safe: true,
                 })
             }
-        }).catch(reject)
+        }).catch(e => console.error(e))
     })
 
     // Check for updates
