@@ -48,9 +48,9 @@ const createWindow = () => {
         show: false,
     })
 
-    if (startMinimized === true) mainWindow.hide()
-
-    mainWindow.once('ready-to-show', () => mainWindow.show())
+    mainWindow.once('ready-to-show', () => {
+        if (startMinimized !== true) mainWindow.show()
+    })
 
     mainWindow.on("close", ev => {
         if (!app.isQuiting) {
