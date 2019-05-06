@@ -202,16 +202,18 @@ const update = (hashlist, hashesparams, lastmodified, temphashes) => {
             hlr.on("line", line => {
                 hashes.add(line)
                 done++
-                self.emit("progress", done / lines + 0.5, 1.0)
+                self.emit("progress", {
+                    done: done / lines + 0.5,
+                    total: 1.0
+                })
             })
 
             // Line reader finished
-            hlr.on("end", () => {
+            hlr.on("end", () =>
                 fs.writeFile(hashlist, lzjs.compress(JSON.stringify([].slice.call(hashes.buckets))), err => {
                     if (err) reject(err)
-                    fs.writeFile(hashesparams, bestFilter[1].toString(), () => self.emit("end"))
-                })
-            })
+                    fs.writeFile(hashesparams, bestFilter.k.toString(), () => self.emit("end"))
+                }))
         }).catch(err => self.emit("progress", err)))
         .pipe(fs.createWriteStream(temphashes))
     return self
@@ -489,6 +491,8 @@ window.onload = () => {
 
         // If out of date update hashes
         else {
+            // Make progress bar determinate
+            $(".app--progress").get(0).MDCLinearProgress.determinate = true
             const u = update(files.hashlist, files.hashesparams, files.lastmodified, files.hashtxt)
             // When progress occurred
             u.on("progress", ({
@@ -496,10 +500,7 @@ window.onload = () => {
                 total,
             }) => {
                 // Make progress bar determinate
-                $(".app--progress").get(0).MDCLinearProgress.determinate = true
-
-                // Make progress bar determinate
-                $(".app--progress").get(0).MDCLinearProgress.progress = done / total
+                document.querySelector(".app--progress").MDCLinearProgress.progress = done / total
             })
             // When complete
             u.on("end", () => {
