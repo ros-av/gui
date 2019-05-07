@@ -427,6 +427,16 @@
     "@material/theme" "^1.1.0"
     tslib "^1.9.3"
 
+"@material/tab-indicator@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@material/tab-indicator/-/tab-indicator-2.1.0.tgz#20c5c5523524e38e62724dc8c830f4b2060fa003"
+  integrity sha512-9A5lF187q5NbJB8uG76OuSZ5GpRdQtWFHj5oLcyhobnG6VMXNgHIt1512fqxBVHhBmDreASa2tfPlpx/rubm7Q==
+  dependencies:
+    "@material/animation" "^1.0.0"
+    "@material/base" "^1.0.0"
+    "@material/theme" "^1.1.0"
+    tslib "^1.9.3"
+
 "@material/tab-scroller@^2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@material/tab-scroller/-/tab-scroller-2.0.0.tgz#663fb313de13bcd6d64fb9d88511e84918c9f919"
@@ -438,15 +448,15 @@
     "@material/tab" "^2.0.0"
     tslib "^1.9.3"
 
-"@material/tab@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@material/tab/-/tab-2.0.0.tgz#a69dac54945c25db6d09c1bdbefda4f2c67e9242"
-  integrity sha512-YOBRa02jF2VQApxhjdfRV1+kGtDvE7y9cjuxKhuCWyS/0PmQ2+W3oueGXJ7fhUB/hqSZAu1tM00bSGmQ/EJZ9Q==
+"@material/tab@^2.0.0", "@material/tab@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@material/tab/-/tab-2.1.0.tgz#1de23d933c3feca116a0678a018a76b0d01f3493"
+  integrity sha512-BpEC2QkUjmEbcWpQQqzc19zrYprQwFexkUAVU1E+XnDqTn68ynu0mU2KRzYPcXi5UIr07eELDB2F2+aa10RypA==
   dependencies:
     "@material/base" "^1.0.0"
     "@material/ripple" "^2.0.0"
     "@material/rtl" "^0.42.0"
-    "@material/tab-indicator" "^1.1.0"
+    "@material/tab-indicator" "^2.1.0"
     "@material/theme" "^1.1.0"
     "@material/typography" "^1.0.0"
     tslib "^1.9.3"
