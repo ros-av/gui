@@ -451,10 +451,10 @@
     "@material/typography" "^1.0.0"
     tslib "^1.9.3"
 
-"@material/textfield@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@material/textfield/-/textfield-2.0.0.tgz#87f97ccd8762bb4c1ddc6c11e781a8dcc7d817b0"
-  integrity sha512-60xGCYbfVz2NhNg2VdWHlGJRUk+KYkEvkw4L2mIG1X8sr3RxGKUpoqdPty9UeARKs+NYqeir5sDM678pyYmfdA==
+"@material/textfield@^2.0.0", "@material/textfield@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@material/textfield/-/textfield-2.1.0.tgz#86fd22576f194809a0b6420bbd1ea84159f88d03"
+  integrity sha512-lzWuLwY07dLLhxdraQMsfop+jLUau4byaFfM8sa90RlkqqDV/TfkpQ+AF18S1rlTXX929Dkf0eYnJsHHtCBbEA==
   dependencies:
     "@material/animation" "^1.0.0"
     "@material/base" "^1.0.0"
