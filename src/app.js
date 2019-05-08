@@ -46,6 +46,7 @@ import {
 import Store from "electron-store"
 const db = new Store({
     cwd: "settings",
+    encryptionKey: "hCjBXNalGSdrRNftsbvQnXzJhToSKVNp"
 })
 
 import * as mdc from "material-components-web"
