@@ -11,7 +11,7 @@ const mainWindow = electron.remote.getCurrentWindow()
 
 // Bloom filter
 import {
-    BloomFilter
+    BloomFilter,
 } from "bloomfilter"
 
 import lib from "./lib"
@@ -32,7 +32,7 @@ const fs = require("graceful-fs").gracefulify(require("fs"))
 const rprog = require("request-progress")
 
 import {
-    Promise
+    Promise,
 } from "bluebird"
 
 const countFileLines = Promise.promisify(require("count-lines-in-file"))
@@ -46,7 +46,7 @@ import {
 import Store from "electron-store"
 const db = new Store({
     cwd: "settings",
-    encryptionKey: "hCjBXNalGSdrRNftsbvQnXzJhToSKVNp"
+    encryptionKey: "hCjBXNalGSdrRNftsbvQnXzJhToSKVNp",
 })
 
 import * as mdc from "material-components-web"
@@ -177,7 +177,7 @@ const update = (hashlist, hashesparams, lastmodified, temphashes) => {
             done: size.transferred / size.total / 2,
             total: 1.0,
         }))
-        .on("end", () => countFileLines(temphashes).then(lines => {
+        .on("end", () => countFileLines(temphashes).then((lines) => {
             const bestFilter = lib.bestForBloom(
                 lines, // Number of bits to allocate
                 1e-10, // Number of hash functions (currently set at 1/1 billion)
@@ -197,35 +197,35 @@ const update = (hashlist, hashesparams, lastmodified, temphashes) => {
             })
 
             // Line reader error
-            hlr.on("error", err => self.emit("error", err))
+            hlr.on("error", (err) => self.emit("error", err))
 
             // New line from line reader
-            hlr.on("line", line => {
+            hlr.on("line", (line) => {
                 hashes.add(line)
                 done++
                 self.emit("progress", {
                     done: done / lines + 0.5,
-                    total: 1.0
+                    total: 1.0,
                 })
             })
 
             // Line reader finished
             hlr.on("end", () =>
-                fs.writeFile(hashlist, lzjs.compress(JSON.stringify([].slice.call(hashes.buckets))), err => {
+                fs.writeFile(hashlist, lzjs.compress(JSON.stringify([].slice.call(hashes.buckets))), (err) => {
                     if (err) reject(err)
                     fs.writeFile(hashesparams, bestFilter.k.toString(), () => self.emit("end"))
                 }))
-        }).catch(err => self.emit("progress", err)))
+        }).catch((err) => self.emit("progress", err)))
         .pipe(fs.createWriteStream(temphashes))
     return self
 }
 
 const checkupdate = (hashlist, lastmodified) => new Promise((resolve, reject) => {
     fs.access(hashlist, fs.constants.F_OK, (err) => {
-        if (err) resolve({
+        if (err) {resolve({
             fileexists: false,
             outofdate: true,
-        })
+        })}
         lib.githubapi("https://api.github.com/rate_limit", (err, _, {
             resources,
         }) => {
@@ -474,7 +474,7 @@ window.onload = () => {
                     safe: true,
                 })
             }
-        }).catch(e => reject(e))
+        }).catch((e) => reject(e))
     })
 
     // Check for updates
