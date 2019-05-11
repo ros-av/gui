@@ -31,6 +31,8 @@ const fs = require("graceful-fs").gracefulify(require("fs"))
 
 const rprog = require("request-progress")
 
+import notifier from "node-notifier"
+
 import {
     Promise,
 } from "bluebird"
