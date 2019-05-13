@@ -319,10 +319,10 @@
     "@material/theme" "^1.1.0"
     tslib "^1.9.3"
 
-"@material/ripple@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@material/ripple/-/ripple-2.0.0.tgz#f8c84c874e784ce00a81f2915917c2bc9a0de628"
-  integrity sha512-VSWhYeJDvBU5WextcC/WH5t92UzxhErIB+xaSfDIU3bViK2s8/qi9pWcd52FkDoLZuLQFsXU22eYJkDav4p+pw==
+"@material/ripple@^2.0.0", "@material/ripple@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@material/ripple/-/ripple-2.1.1.tgz#850e44bafe9db962f400c7e067eb28c1cb11010b"
+  integrity sha512-/WIOBen3OLasJrr2ZXo9wpVJo6Z+1qFxnOvC61iXWqnDctq1fgTAQQbiMaRtsbfU68jDfhgLFJlwjgzvqAvFWQ==
   dependencies:
     "@material/animation" "^1.0.0"
     "@material/base" "^1.0.0"
@@ -417,16 +417,6 @@
     "@material/tab-scroller" "^2.1.0"
     tslib "^1.9.3"
 
-"@material/tab-indicator@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@material/tab-indicator/-/tab-indicator-1.1.0.tgz#2c37e8fe146d84a99482509cbb785f67336f0463"
-  integrity sha512-wbZMFCfQo62einr/Ju9PDAeFpRR/Ori5oV2lcsF1uSQXeLxougarwcbk0egWnEtY4Wa6dPgM5P6wQQsYnIeUIQ==
-  dependencies:
-    "@material/animation" "^1.0.0"
-    "@material/base" "^1.0.0"
-    "@material/theme" "^1.1.0"
-    tslib "^1.9.3"
-
 "@material/tab-indicator@^2.1.0":
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@material/tab-indicator/-/tab-indicator-2.1.0.tgz#20c5c5523524e38e62724dc8c830f4b2060fa003"
@@ -448,13 +438,13 @@
     "@material/tab" "^2.1.0"
     tslib "^1.9.3"
 
-"@material/tab@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@material/tab/-/tab-2.1.0.tgz#1de23d933c3feca116a0678a018a76b0d01f3493"
-  integrity sha512-BpEC2QkUjmEbcWpQQqzc19zrYprQwFexkUAVU1E+XnDqTn68ynu0mU2KRzYPcXi5UIr07eELDB2F2+aa10RypA==
+"@material/tab@^2.1.0", "@material/tab@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@material/tab/-/tab-2.1.1.tgz#5bb9bfe7e63e8d356a8c092cc3593fc6c4580ff7"
+  integrity sha512-zUuY/il7nXwxHzVQ3NC+9r/CghUl0sIMajv/03yiqtjjCEZui4d39mAEK4Y6lcsKj41Ig/5tTQTt6TwKhusFTw==
   dependencies:
     "@material/base" "^1.0.0"
-    "@material/ripple" "^2.0.0"
+    "@material/ripple" "^2.1.1"
     "@material/rtl" "^0.42.0"
     "@material/tab-indicator" "^2.1.0"
     "@material/theme" "^1.1.0"
