@@ -406,15 +406,15 @@
     "@material/theme" "^1.1.0"
     tslib "^1.9.3"
 
-"@material/tab-bar@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@material/tab-bar/-/tab-bar-2.1.0.tgz#4d9f6d9e003dc4877e94cb6076c253e245230e56"
-  integrity sha512-UG31YVLJWZJKRi9vk0+YuyyFQz52jEl1uy3fy1a6qUZzw4AFgtc+oO0xbVwfw/6QLBmAl/3q0QIfUw4c37IAPA==
+"@material/tab-bar@^2.1.0", "@material/tab-bar@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@material/tab-bar/-/tab-bar-2.1.1.tgz#c8388eb12ab357cef5a441ad5900d3ffdb5b2162"
+  integrity sha512-/Tr/q2DJAs6P1h3fKrBSBR1R5CkY2JiGyRHaAImCDVfSg4Pb43inHaCmAegkahA1+5QlAn+Dc0QZy8zfTW4+7g==
   dependencies:
     "@material/base" "^1.0.0"
     "@material/elevation" "^1.1.0"
-    "@material/tab" "^2.1.0"
-    "@material/tab-scroller" "^2.1.0"
+    "@material/tab" "^2.1.1"
+    "@material/tab-scroller" "^2.1.1"
     tslib "^1.9.3"
 
 "@material/tab-indicator@^2.1.0":
@@ -427,15 +427,15 @@
     "@material/theme" "^1.1.0"
     tslib "^1.9.3"
 
-"@material/tab-scroller@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@material/tab-scroller/-/tab-scroller-2.1.0.tgz#c4bddefdbc8c1b0c1b60203c1cd72f976503b316"
-  integrity sha512-RsojHqlxFlI32i+XjKrmJtnqQBZtuxGelbfwFL+TZprCDycCdW0WTXWe9TLY07UmODJ1XjpLB9M+m9c8QdKTvg==
+"@material/tab-scroller@^2.1.0", "@material/tab-scroller@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@material/tab-scroller/-/tab-scroller-2.1.1.tgz#31b9eae40a29757bbc5d5f1d1742423049f5520c"
+  integrity sha512-dyoJjdRo5Fi8A/PcLVnLODcBoPYzx0VKgnUyRSkxDggllIALELTv6LXnCEbrAxznwaMu94nOVjZ7eliEgu62cg==
   dependencies:
     "@material/animation" "^1.0.0"
     "@material/base" "^1.0.0"
     "@material/dom" "^1.1.0"
-    "@material/tab" "^2.1.0"
+    "@material/tab" "^2.1.1"
     tslib "^1.9.3"
 
 "@material/tab@^2.1.0", "@material/tab@^2.1.1":

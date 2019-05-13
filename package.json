@@ -72,7 +72,7 @@
         "@material/ripple": "^2.0.0",
         "@material/switch": "^2.1.1",
         "@material/tab": "^2.1.1",
-        "@material/tab-bar": "^2.1.0",
+        "@material/tab-bar": "^2.1.1",
         "@material/tab-indicator": "^2.1.0",
         "@material/textfield": "^2.1.0",
         "@material/top-app-bar": "^2.1.1",
