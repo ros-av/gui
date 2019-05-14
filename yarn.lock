@@ -252,7 +252,7 @@
     "@material/theme" "^1.1.0"
     tslib "^1.9.3"
 
-"@material/list@^2.0.0", "@material/list@^2.1.1":
+"@material/list@^2.1.1":
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/@material/list/-/list-2.1.1.tgz#fac8fc886d72c33ffb0f91abbc2483570cda4674"
   integrity sha512-yZFNLQ6+nTGTJsVuqbYh9gSC+aUh3hC/0aJZzAjVCCY0qSi1vWDHcYdgmgDr4THznlcPr9TxAi6IBiJ/fHXjZg==
@@ -438,10 +438,10 @@
     "@material/tab" "^2.1.1"
     tslib "^1.9.3"
 
-"@material/tab@^2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@material/tab/-/tab-2.1.1.tgz#5bb9bfe7e63e8d356a8c092cc3593fc6c4580ff7"
-  integrity sha512-zUuY/il7nXwxHzVQ3NC+9r/CghUl0sIMajv/03yiqtjjCEZui4d39mAEK4Y6lcsKj41Ig/5tTQTt6TwKhusFTw==
+"@material/tab@^2.1.1", "@material/tab@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@material/tab/-/tab-2.2.0.tgz#9ef16ea68ab52ce75d98f0e25694f70f3428873c"
+  integrity sha512-XF7V4EdnKiYSHA8IMONNeaddWcmHsgFqgZ0iWFehKjBaCJnzJ51q4tWSpsuTbwdwmlPtz+60HCnPNkVUzvV7fA==
   dependencies:
     "@material/base" "^1.0.0"
     "@material/ripple" "^2.1.1"
