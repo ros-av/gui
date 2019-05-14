@@ -84,15 +84,16 @@
     "@material/theme" "^1.1.0"
     tslib "^1.9.3"
 
-"@material/chips@^2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@material/chips/-/chips-2.1.1.tgz#497e51e9e2656a27c162dda818681c8875332578"
-  integrity sha512-hZ0EWO+o0SGXPtIzwJsnT6NL5pgFXWsMyxzAeenE89DZFcC0TudfYe4kE2df0pzZYoGkk0n/5NBly/WLEbJtfA==
+"@material/chips@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@material/chips/-/chips-2.2.0.tgz#5bcf2059d39937714c98474aa13e1eefc444ef12"
+  integrity sha512-SqaW8kjIBOaTGNJgqcnyQuGiOqYiXO/3aSzQR8cLZjo5fKAwuO5yaKYpP46N3hV8pasEv8RgRFo4CM7QAvTlqg==
   dependencies:
     "@material/animation" "^1.0.0"
     "@material/base" "^1.0.0"
     "@material/checkbox" "^2.1.1"
     "@material/elevation" "^1.1.0"
+    "@material/feature-targeting" "^0.44.1"
     "@material/ripple" "^2.1.1"
     "@material/shape" "^1.1.1"
     "@material/theme" "^1.1.0"
@@ -252,7 +253,7 @@
     "@material/theme" "^1.1.0"
     tslib "^1.9.3"
 
-"@material/list@^2.0.0", "@material/list@^2.1.1":
+"@material/list@^2.1.1":
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/@material/list/-/list-2.1.1.tgz#fac8fc886d72c33ffb0f91abbc2483570cda4674"
   integrity sha512-yZFNLQ6+nTGTJsVuqbYh9gSC+aUh3hC/0aJZzAjVCCY0qSi1vWDHcYdgmgDr4THznlcPr9TxAi6IBiJ/fHXjZg==
@@ -406,15 +407,15 @@
     "@material/theme" "^1.1.0"
     tslib "^1.9.3"
 
-"@material/tab-bar@^2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@material/tab-bar/-/tab-bar-2.1.1.tgz#c8388eb12ab357cef5a441ad5900d3ffdb5b2162"
-  integrity sha512-/Tr/q2DJAs6P1h3fKrBSBR1R5CkY2JiGyRHaAImCDVfSg4Pb43inHaCmAegkahA1+5QlAn+Dc0QZy8zfTW4+7g==
+"@material/tab-bar@^2.1.1", "@material/tab-bar@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@material/tab-bar/-/tab-bar-2.2.0.tgz#cee19d2f458bd07bdac1a960fa7c787b711babdb"
+  integrity sha512-XIkAa66afgWIGSb7kSDd0iOyOzOhsERfgXBp4vGhRtm4n9hhIvk76XT2xAJqKqomM6Mt2go8ACPsndrB2ejoNg==
   dependencies:
     "@material/base" "^1.0.0"
     "@material/elevation" "^1.1.0"
-    "@material/tab" "^2.1.1"
-    "@material/tab-scroller" "^2.1.1"
+    "@material/tab" "^2.2.0"
+    "@material/tab-scroller" "^2.2.0"
     tslib "^1.9.3"
 
 "@material/tab-indicator@^2.1.0":
@@ -427,21 +428,21 @@
     "@material/theme" "^1.1.0"
     tslib "^1.9.3"
 
-"@material/tab-scroller@^2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@material/tab-scroller/-/tab-scroller-2.1.1.tgz#31b9eae40a29757bbc5d5f1d1742423049f5520c"
-  integrity sha512-dyoJjdRo5Fi8A/PcLVnLODcBoPYzx0VKgnUyRSkxDggllIALELTv6LXnCEbrAxznwaMu94nOVjZ7eliEgu62cg==
+"@material/tab-scroller@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@material/tab-scroller/-/tab-scroller-2.2.0.tgz#88c6fbdf3e2d241abc4da99c31e81c49f5009f1e"
+  integrity sha512-bkEhBAwZJDkhS5fUUb6Re3noJiOw5akeL4OrTFyFfUFMj0GMlTiwWaOctRbKGy+Vb+f04rdCSh7inc+FInntlQ==
   dependencies:
     "@material/animation" "^1.0.0"
     "@material/base" "^1.0.0"
     "@material/dom" "^1.1.0"
-    "@material/tab" "^2.1.1"
+    "@material/tab" "^2.2.0"
     tslib "^1.9.3"
 
-"@material/tab@^2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@material/tab/-/tab-2.1.1.tgz#5bb9bfe7e63e8d356a8c092cc3593fc6c4580ff7"
-  integrity sha512-zUuY/il7nXwxHzVQ3NC+9r/CghUl0sIMajv/03yiqtjjCEZui4d39mAEK4Y6lcsKj41Ig/5tTQTt6TwKhusFTw==
+"@material/tab@^2.1.1", "@material/tab@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@material/tab/-/tab-2.2.0.tgz#9ef16ea68ab52ce75d98f0e25694f70f3428873c"
+  integrity sha512-XF7V4EdnKiYSHA8IMONNeaddWcmHsgFqgZ0iWFehKjBaCJnzJ51q4tWSpsuTbwdwmlPtz+60HCnPNkVUzvV7fA==
   dependencies:
     "@material/base" "^1.0.0"
     "@material/ripple" "^2.1.1"
@@ -5395,10 +5396,10 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
-material-components-web@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/material-components-web/-/material-components-web-2.1.1.tgz#716b85e5651c478425a75e9f0da4aa33194414c5"
-  integrity sha512-wUpP7rKjI8ohI2YAl9V3nkwB80l0DxItxHrkQrM/esfALuQkGmhaEQ5lk0YpSTzvWiMT4CNdvezHKF+nWjwXTQ==
+material-components-web@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/material-components-web/-/material-components-web-2.2.0.tgz#c12909c19dacb1273a6f70dd933096f883633de6"
+  integrity sha512-PTtgBj0m64ctbvoroIByynW+V85sNl3U59skgo7cRg9yoI0X7r6RlX+VsuVmKDexvaMq9mEHVNccgVk/5upvfw==
   dependencies:
     "@material/animation" "^1.0.0"
     "@material/auto-init" "^1.0.0"
@@ -5406,7 +5407,7 @@ material-components-web@^2.1.1:
     "@material/button" "^2.1.1"
     "@material/card" "^2.1.1"
     "@material/checkbox" "^2.1.1"
-    "@material/chips" "^2.1.1"
+    "@material/chips" "^2.2.0"
     "@material/dialog" "^2.1.1"
     "@material/dom" "^1.1.0"
     "@material/drawer" "^2.1.1"
@@ -5433,10 +5434,10 @@ material-components-web@^2.1.1:
     "@material/slider" "^1.1.0"
     "@material/snackbar" "^2.1.1"
     "@material/switch" "^2.1.1"
-    "@material/tab" "^2.1.1"
-    "@material/tab-bar" "^2.1.1"
+    "@material/tab" "^2.2.0"
+    "@material/tab-bar" "^2.2.0"
     "@material/tab-indicator" "^2.1.0"
-    "@material/tab-scroller" "^2.1.1"
+    "@material/tab-scroller" "^2.2.0"
     "@material/textfield" "^2.1.1"
     "@material/theme" "^1.1.0"
     "@material/toolbar" "^2.1.1"
