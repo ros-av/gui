@@ -86,7 +86,7 @@
         "electron-compilers": "^5.9.0",
         "electron-squirrel-startup": "^1.0.0",
         "electron-store": "^3.2.0",
-        "fast-glob": "^2.2.6",
+        "fast-glob": "^2.2.7",
         "firstline": "^2.0.2",
         "graceful-fs": "^4.1.15",
         "jquery": "^3.4.1",
