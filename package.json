@@ -78,7 +78,7 @@
         "@material/top-app-bar": "^2.1.1",
         "auto-launch": "^5.0.5",
         "bloomfilter": "^0.0.18",
-        "bluebird": "^3.5.4",
+        "bluebird": "^3.5.5",
         "chokidar": "^3.0.0",
         "count-lines-in-file": "^1.1.0",
         "dayjs": "^1.8.14",
