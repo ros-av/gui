@@ -392,17 +392,17 @@
     "@material/typography" "^1.0.0"
     tslib "^1.9.3"
 
-"@material/switch@^2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@material/switch/-/switch-2.1.1.tgz#3b8d0d866414021c75b0e33760a14fe194a23cdf"
-  integrity sha512-9Y08W7ygx+zy9+/hUZR5ZBdaxOEpF3D8v+wJK+EfEGhAPpYj6e2aTz83kMLGpKzvdY500QGVjvh++gbi5XQv+Q==
+"@material/switch@^2.1.1", "@material/switch@^2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@material/switch/-/switch-2.3.0.tgz#3ea7acc35d645d83a718e40d27e72ccca083e271"
+  integrity sha512-c21j5VJFUAoey1fPGZaQaRcFeXZcP6dPYewUgFdGURtHnbVHqVVf5GEAcnFsk2NuBN2mDqKLQ3AKbozIAi65hw==
   dependencies:
     "@material/animation" "^1.0.0"
     "@material/base" "^1.0.0"
     "@material/dom" "^1.1.0"
     "@material/elevation" "^1.1.0"
     "@material/feature-targeting" "^0.44.1"
-    "@material/ripple" "^2.1.1"
+    "@material/ripple" "^2.3.0"
     "@material/rtl" "^0.42.0"
     "@material/theme" "^1.1.0"
     tslib "^1.9.3"
