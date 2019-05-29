@@ -418,10 +418,10 @@
     "@material/tab-scroller" "^2.2.0"
     tslib "^1.9.3"
 
-"@material/tab-indicator@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@material/tab-indicator/-/tab-indicator-2.1.0.tgz#20c5c5523524e38e62724dc8c830f4b2060fa003"
-  integrity sha512-9A5lF187q5NbJB8uG76OuSZ5GpRdQtWFHj5oLcyhobnG6VMXNgHIt1512fqxBVHhBmDreASa2tfPlpx/rubm7Q==
+"@material/tab-indicator@^2.1.0", "@material/tab-indicator@^2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@material/tab-indicator/-/tab-indicator-2.3.0.tgz#db2eb467303e4b7cd09bc92b23f1d575dd5aee37"
+  integrity sha512-E9jlESIfjTOoo2pZn7KoTeXEW2jI/2RVtu6IEbhfESLuxPGYmxgO+QxIodEW0VoJhogaa6hR/mFnYBVLbh3JZQ==
   dependencies:
     "@material/animation" "^1.0.0"
     "@material/base" "^1.0.0"
