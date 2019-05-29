@@ -38,6 +38,14 @@
     "@material/base" "^1.0.0"
     tslib "^1.9.3"
 
+"@material/auto-init@^2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@material/auto-init/-/auto-init-2.3.0.tgz#3d32507675939ab0d7c9f05b075805ed24d22095"
+  integrity sha512-WFlX3xdZjp/gWZiY0+poFjO12fl8t8C9M82kkQLb6WaUkoQ1YHeV2xQSDLY4IvwcKXb70IpcU3Tqgh+aoiHC0w==
+  dependencies:
+    "@material/base" "^1.0.0"
+    tslib "^1.9.3"
+
 "@material/base@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@material/base/-/base-1.0.0.tgz#e4ef0b22c54aa887af94f5988fb1c0cb3245beba"
