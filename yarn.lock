@@ -30,14 +30,6 @@
   dependencies:
     tslib "^1.9.3"
 
-"@material/auto-init@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@material/auto-init/-/auto-init-1.0.0.tgz#0431b03f1bd533f57c4532657e236fe47711f3ab"
-  integrity sha512-xlWEjjyQquXMi9xz3RH7HW/5dsLGkVYQnm1WCYw2a6JIpIlipkkLEzBNc//agiQongIBbLndL07gO7WQeSohNA==
-  dependencies:
-    "@material/base" "^1.0.0"
-    tslib "^1.9.3"
-
 "@material/auto-init@^2.3.0":
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/@material/auto-init/-/auto-init-2.3.0.tgz#3d32507675939ab0d7c9f05b075805ed24d22095"
@@ -8062,10 +8054,10 @@ untildify@^3.0.2:
   resolved "https://registry.yarnpkg.com/untildify/-/untildify-3.0.3.tgz#1e7b42b140bcfd922b22e70ca1265bfe3634c7c9"
   integrity sha512-iSk/J8efr8uPT/Z4eSUywnqyrQU7DSdMfdqK4iWEaUVVmcP5JcnpRqmVMwcwcnmI1ATFNgC5V90u09tBynNFKA==
 
-update-electron-app@^1.3.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/update-electron-app/-/update-electron-app-1.3.0.tgz#581e8f7cb8931de4884fd22e291bc558a5d91dd1"
-  integrity sha512-OXfcmeenpjMyzXmadZ6NqxnrpPpiLji0sLUpXkexfX97XM8Gnk4iLovk4TlK4N8dzlETWdm9klgMmo9HpRbK7Q==
+update-electron-app@^1.4.2:
+  version "1.4.2"
+  resolved "https://registry.yarnpkg.com/update-electron-app/-/update-electron-app-1.4.2.tgz#4f75aba33ceb50db779e28747ecfa797d6634708"
+  integrity sha512-JW6QnDTBLwf2nukDe6PJCkBphEnYjoTdRmhtgX/TEHTiG1Kl0gZ6/FirXZiAJnXUW/qSeQqUO6evcnGE1VWWUQ==
   dependencies:
     electron-is-dev "^0.3.0"
     github-url-to-object "^4.0.4"
