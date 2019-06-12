@@ -452,10 +452,10 @@
     "@material/typography" "^2.3.0"
     tslib "^1.9.3"
 
-"@material/textfield@^2.1.0", "@material/textfield@^2.3.0":
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/@material/textfield/-/textfield-2.3.0.tgz#45df864e553460d084e48de940ca07fa38508520"
-  integrity sha512-6Tc0XZDEcU7tQgASNDNQPSxVzkmR7iO5zGynemXydYsmXzrcoisId2nyD2OWW+XBw+TUkJs93REd38Ij8l9LKw==
+"@material/textfield@^2.3.0", "@material/textfield@^2.3.1":
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/@material/textfield/-/textfield-2.3.1.tgz#893183f86b3c6f5913247f56f8516dcbf83a1cd8"
+  integrity sha512-4w/HyJjNUTnYwuLpOaYEDN45bdFkBcZLC3QfCn3I0B3qrbM1zcpmDUxG0DYyGj1oXCM/sDJXMk07u6CcXpJU5w==
   dependencies:
     "@material/animation" "^1.0.0"
     "@material/base" "^1.0.0"
