@@ -85,7 +85,7 @@
         "downloads-folder": "^1.0.1",
         "electron-compilers": "^5.9.0",
         "electron-squirrel-startup": "^1.0.0",
-        "electron-store": "^3.3.0",
+        "electron-store": "^4.0.0",
         "fast-glob": "^2.2.7",
         "firstline": "^2.0.2",
         "graceful-fs": "^4.1.15",
