@@ -5,53 +5,47 @@ process.once("loaded", () => global.setImmediate = _setImmediate)
 // Electron
 const electron = require("electron")
 
-require("electron-compile/lib/initialize-renderer").initializeRendererProcess(electron.remote.getGlobal("globalCompilerHost").readOnlyMode)
-
 const mainWindow = electron.remote.getCurrentWindow()
 
 // Bloom filter
-import {
+const {
     BloomFilter,
-} from "bloomfilter"
+} = require("bloomfilter")
 
-import lib from "./lib"
+const lib = require("./utils")
 
-import * as lzjs from "lzjs"
+const lzjs = require("lzjs")
 
-import Vue from "vue/dist/vue.min.js"
+const Vue = require("vue/dist/vue.min.js")
 
-import path from "path"
+const path = require("path")
 
-import dayjs from "dayjs"
+const dayjs = require("dayjs")
 
-import * as chokidar from "chokidar"
+const chokidar = require("chokidar")
 
 // Provide improved filesystem functions
 const fs = require("graceful-fs").gracefulify(require("fs"))
 
 const rprog = require("request-progress")
 
-import notifier from "node-notifier"
+const notifier = require("node-notifier")
 
-import {
-    Promise,
-} from "bluebird"
+const Promise = require("bluebird")
 
 const countFileLines = Promise.promisify(require("count-lines-in-file"))
 
-import LineByLineReader from "line-by-line"
+const LineByLineReader = require("line-by-line")
 
-import {
-    EventEmitter,
-} from "events"
+const EventEmitter = require("events")
 
-import Store from "electron-store"
+const Store = require("electron-store")
 const db = new Store({
     cwd: "settings",
     encryptionKey: "hCjBXNalGSdrRNftsbvQnXzJhToSKVNp",
 })
 
-import * as mdc from "material-components-web"
+const mdc = require("material-components-web")
 
 const dirs = {
     rootdir: path.parse(process.cwd()).root, // Root directory

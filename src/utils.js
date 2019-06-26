@@ -5,23 +5,23 @@ const Promise = require("bluebird")
 const fs = require("graceful-fs").gracefulify(require("fs"))
 
 // Path manager
-import * as path from "path"
+const path = require("path")
 
 // Get first line of file
-import * as firstline from "firstline"
+const firstline = require("firstline")
 
 // Bloom filter
-import {
+const {
     BloomFilter
-} from "bloomfilter"
+} = require("bloomfilter")
 
 // MD5 File
-import * as md5file from "md5-file"
+const md5file = require("md5-file")
 
 // LZString
-import * as lzjs from "lzjs"
+const lzjs = require("lzjs")
 
-const populateDirectory = dir => new Promise((resolve, reject) =>
+exports.populateDirectory = (dir) => new Promise((resolve, reject) =>
     fs.access(dir, fs.constants.F_OK, (err) => {
         if (err) {
             fs.mkdir(dir, {
@@ -35,7 +35,7 @@ const populateDirectory = dir => new Promise((resolve, reject) =>
 )
 
 // Hashes loader
-const loadHashes = (hashes, hashesparams) => new Promise((resolve) =>
+exports.loadHashes = (hashes, hashesparams) => new Promise((resolve) =>
     Promise.all([firstline(hashesparams), firstline(hashes)]).then((val) =>
         resolve(new BloomFilter(JSON.parse(lzjs.decompress(val[1])), parseInt(val[0])))
     )
@@ -61,7 +61,8 @@ const safe = (dir, hashes) => new Promise((resolve, reject) => {
     })
 })
 
-const userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.108 Safari/537.36"
+const version = require("../package.json").version
+const userAgent = `ROS AV ${version}`
 
 const request = require("request").defaults({
     gzip: true,
@@ -71,28 +72,20 @@ const request = require("request").defaults({
     },
 })
 
-const githubapi = request.defaults({
+exports.request = request
+
+exports.githubapi = request.defaults({
     json: true,
     headers: {
         "Accept": "application/vnd.github.v3+json",
     },
 })
 
-const bestForBloom = (n, p) => {
+exports.bestForBloom = (n, p) => {
     const m = Math.ceil((n * Math.log(p)) / Math.log(1 / (2 ** Math.log(2))))
     const k = Math.round((m / n) * Math.log(2))
     return {
         m,
-        k
+        k,
     }
-}
-
-export default {
-    populateDirectory,
-    loadHashes,
-    safe,
-    userAgent,
-    request,
-    githubapi,
-    bestForBloom,
 }

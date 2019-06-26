@@ -1,11 +1,11 @@
-import {
+const {
     app,
     Menu,
     Tray,
     BrowserWindow,
-} from "electron"
+} = require("electron")
 
-import AutoLaunch from "auto-launch"
+const AutoLaunch = require("auto-launch")
 
 new AutoLaunch({
     name: "ROS AV",
@@ -15,10 +15,6 @@ new AutoLaunch({
 require("update-electron-app")()
 
 const path = require("path")
-
-import {
-    enableLiveReload,
-} from "electron-compile"
 
 app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
 
@@ -33,8 +29,6 @@ let mainWindow
 const startMinimized = (process.argv || []).indexOf("--hidden") !== -1;
 
 const createWindow = () => {
-    enableLiveReload()
-
     // Create the browser window.
     mainWindow = new BrowserWindow({
         width: 1280,
@@ -44,7 +38,7 @@ const createWindow = () => {
             nodeIntegration: false,
             nodeIntegrationInWorker: false,
             contextIsolation: false,
-            preload: path.join(__dirname, "app-loader.js"),
+            preload: path.join(__dirname, "app.js"),
         },
         frame: false,
         show: false,
