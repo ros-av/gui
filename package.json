@@ -70,7 +70,7 @@
         "@material/linear-progress": "^2.3.0",
         "@material/list": "^2.1.1",
         "@material/ripple": "^2.3.0",
-        "@material/switch": "^2.1.1",
+        "@material/switch": "^3.0.0",
         "@material/tab": "^2.2.0",
         "@material/tab-bar": "^2.1.1",
         "@material/tab-indicator": "^2.3.0",
