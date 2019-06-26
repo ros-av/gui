@@ -12,7 +12,7 @@ const firstline = require("firstline")
 
 // Bloom filter
 const {
-    BloomFilter
+    BloomFilter,
 } = require("bloomfilter")
 
 // MD5 File
