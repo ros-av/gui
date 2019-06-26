@@ -19,7 +19,9 @@
         "url": "git+https://github.com/ros-av/gui.git"
     },
     "keywords": [
-        "av", "antivirus", "viruslist"
+        "av",
+        "antivirus",
+        "viruslist"
     ],
     "bugs": {
         "url": "https://github.com/ros-av/gui/issues"
@@ -34,56 +36,63 @@
     "config": {
         "forge": {
             "packagerConfig": {},
-            "makers": [{
-                "name": "@electron-forge/maker-deb",
-                "config": {
-                    "options": {
-                        "name": "rosav",
-                        "categories": [
-                            "Development", "Utility"
-                        ],
-                        "maintainer": "Richie Bendall",
-                        "homepage": "https://richienb.github.io"
+            "makers": [
+                {
+                    "name": "@electron-forge/maker-deb",
+                    "config": {
+                        "options": {
+                            "name": "rosav",
+                            "categories": [
+                                "Development",
+                                "Utility"
+                            ],
+                            "maintainer": "Richie Bendall",
+                            "homepage": "https://richienb.github.io"
+                        }
                     }
-                }
-            }, {
-                "name": "@electron-forge/maker-dmg",
-                "config": {
-                    "name": "ROS AV",
-                    "background": "./assets/dmg-background.png"
-                }
-            }, {
-                "name": "@electron-forge/maker-rpm",
-                "config": {
-                    "options": {
+                },
+                {
+                    "name": "@electron-forge/maker-dmg",
+                    "config": {
                         "name": "ROS AV",
-                        "maintainer": "Richie Bendall",
-                        "homepage": "https://richienb.github.io"
+                        "background": "./assets/dmg-background.png"
                     }
+                },
+                {
+                    "name": "@electron-forge/maker-rpm",
+                    "config": {
+                        "options": {
+                            "name": "ROS AV",
+                            "maintainer": "Richie Bendall",
+                            "homepage": "https://richienb.github.io"
+                        }
+                    }
+                },
+                {
+                    "name": "@electron-forge/maker-squirrel",
+                    "config": {
+                        "name": "ROS AV"
+                    }
+                },
+                {
+                    "name": "@electron-forge/maker-zip",
+                    "config": {}
                 }
-            }, {
-                "name": "@electron-forge/maker-squirrel",
-                "config": {
-                    "name": "ROS AV"
-                }
-            }, {
-                "name": "@electron-forge/maker-zip",
-                "config": {}
-            }]
+            ]
         }
     },
     "dependencies": {
-        "@material/auto-init": "^2.3.0",
-        "@material/icon-button": "^2.3.0",
-        "@material/linear-progress": "^2.3.0",
-        "@material/list": "^2.3.0",
-        "@material/ripple": "^2.3.0",
-        "@material/switch": "^2.3.0",
-        "@material/tab": "^2.3.0",
-        "@material/tab-bar": "^2.3.0",
-        "@material/tab-indicator": "^2.3.0",
-        "@material/textfield": "^2.3.1",
-        "@material/top-app-bar": "^2.3.0",
+        "@material/auto-init": "^3.0.0",
+        "@material/icon-button": "^3.0.0",
+        "@material/linear-progress": "^3.0.0",
+        "@material/list": "^3.0.0",
+        "@material/ripple": "^3.0.0",
+        "@material/switch": "^3.0.0",
+        "@material/tab": "^3.0.0",
+        "@material/tab-bar": "^3.0.0",
+        "@material/tab-indicator": "^3.0.0",
+        "@material/textfield": "^3.0.0",
+        "@material/top-app-bar": "^3.0.0",
         "auto-launch": "^5.0.5",
         "bloomfilter": "^0.0.18",
         "bluebird": "^3.5.5",
@@ -92,15 +101,15 @@
         "dayjs": "^1.8.14",
         "downloads-folder": "^1.0.1",
         "electron-squirrel-startup": "^1.0.0",
-        "electron-store": "^3.3.0",
-        "fast-glob": "^3.0.1",
+        "electron-store": "^4.0.0",
+        "fast-glob": "^3.0.2",
         "firstline": "^2.0.2",
         "graceful-fs": "^4.1.15",
         "jquery": "^3.4.1",
         "line-by-line": "^0.1.6",
         "lz-string": "^1.4.4",
         "lzjs": "^1.3.0",
-        "material-components-web": "^2.3.1",
+        "material-components-web": "^3.0.0",
         "md5-file": "^4.0.0",
         "node-notifier": "^5.4.0",
         "normalize.css": "^8.0.1",
@@ -115,10 +124,10 @@
         "babel-plugin-transform-async-to-generator": "^6.24.1",
         "babel-preset-env": "^1.7.0",
         "electron": "^5.0.5",
-        "eslint": "^6.0.0",
+        "eslint": "^6.0.1",
         "eslint-config-google": "^0.13.0",
-        "eslint-plugin-import": "^2.17.3",
+        "eslint-plugin-import": "^2.18.0",
         "eslint-plugin-jsx-a11y": "^6.2.1",
-        "eslint-plugin-vue": "^5.2.2"
+        "eslint-plugin-vue": "^5.2.3"
     }
 }
