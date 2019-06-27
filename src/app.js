@@ -8,44 +8,48 @@ const electron = require("electron")
 const mainWindow = electron.remote.getCurrentWindow()
 
 // Bloom filter
-const {
+import {
     BloomFilter,
-} = require("bloomfilter")
+} from "bloomfilter"
 
-const lib = require("./utils")
+import lib from "./utils"
 
-const lzjs = require("lzjs")
+import * as lzjs from "lzjs"
 
-const Vue = require("vue/dist/vue.min.js")
+import Vue from "vue/dist/vue.min.js"
 
-const path = require("path")
+import path from "path"
 
-const dayjs = require("dayjs")
+import dayjs from "dayjs"
 
-const chokidar = require("chokidar")
+import * as chokidar from "chokidar"
 
 // Provide improved filesystem functions
 const fs = require("graceful-fs").gracefulify(require("fs"))
 
 const rprog = require("request-progress")
 
-const notifier = require("node-notifier")
+import notifier from "node-notifier"
 
-const Promise = require("bluebird")
+import {
+    Promise,
+} from "bluebird"
 
 const countFileLines = Promise.promisify(require("count-lines-in-file"))
 
-const LineByLineReader = require("line-by-line")
+import LineByLineReader from "line-by-line"
 
-const EventEmitter = require("events")
+import {
+    EventEmitter,
+} from "events"
 
-const Store = require("electron-store")
+import Store from "electron-store"
 const db = new Store({
     cwd: "settings",
     encryptionKey: "hCjBXNalGSdrRNftsbvQnXzJhToSKVNp",
 })
 
-const mdc = require("material-components-web")
+import * as mdc from "material-components-web"
 
 const dirs = {
     rootdir: path.parse(process.cwd()).root, // Root directory
