@@ -10,14 +10,14 @@ import AutoLaunch from "auto-launch"
 
 new AutoLaunch({
     name: "ROS AV",
-    isHidden: true
-}).enable();
+    isHidden: true,
+}).enable()
 
 require("update-electron-app")()
 
 import path from "path"
 
-app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
+app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required")
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) { // eslint-disable-line global-require
@@ -27,7 +27,7 @@ if (require("electron-squirrel-startup")) { // eslint-disable-line global-requir
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
-const startMinimized = (process.argv || []).indexOf("--hidden") !== -1;
+const startMinimized = (process.argv || []).indexOf("--hidden") !== -1
 
 const createWindow = () => {
     // Create the browser window.
@@ -49,7 +49,7 @@ const createWindow = () => {
         if (startMinimized !== true) mainWindow.show()
     })
 
-    mainWindow.on("close", ev => {
+    mainWindow.on("close", (ev) => {
         if (!app.isQuiting) {
             ev.preventDefault()
             mainWindow.hide()
