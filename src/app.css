@@ -46,7 +46,7 @@
 }
 
 .mdc-top-app-bar {
-    background-color: #3949AB;
+    background-color: #3949ab;
 }
 
 .mdc-switch--label {
@@ -117,4 +117,31 @@
     background-clip: padding-box;
     border: solid transparent;
     border-width: 0 0 0 4px;
+}
+
+.mdc-card__primary,
+.mdc-card__secondary {
+    margin-left: 16px;
+}
+
+.mdc-card__secondary {
+    margin-bottom: 16px;
+}
+
+.plugin__switch {
+    margin-right: 16px;
+}
+
+body {
+    background-color: #fafafa;
+    min-height: 100vh;
+}
+
+.mdc-layout-grid {
+    padding: 0;
+    margin-top: 16px;
+}
+
+.plugin__search {
+    width: calc(100% - 52px);
 }

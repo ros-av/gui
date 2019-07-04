@@ -1,47 +1,24 @@
-// setImmediate Polyfill
-const _setImmediate = setImmediate
-process.once("loaded", () => global.setImmediate = _setImmediate)
+// Sentry error reporting
+import * as Sentry from "@sentry/electron"
+Sentry.init({dsn: "https://06cb13f75c06473896ff934eed943998@sentry.io/1493471"})
+
+// ES6 support
+require = require("esm")(module)
 
 // Electron
-const electron = require("electron")
+import electron from "electron"
 
 const mainWindow = electron.remote.getCurrentWindow()
-
-// Bloom filter
-import {
-    BloomFilter,
-} from "bloomfilter"
-
-import lib from "./utils"
-
-import * as lzjs from "lzjs"
 
 import Vue from "vue/dist/vue.min.js"
 
 import path from "path"
 
-import dayjs from "dayjs"
+import chokidar from "chokidar"
 
-import * as chokidar from "chokidar"
+import fs from "./utils/fs"
 
-// Provide improved filesystem functions
-const fs = require("graceful-fs").gracefulify(require("fs"))
-
-const rprog = require("request-progress")
-
-import notifier from "node-notifier"
-
-import {
-    Promise,
-} from "bluebird"
-
-const countFileLines = Promise.promisify(require("count-lines-in-file"))
-
-import LineByLineReader from "line-by-line"
-
-import {
-    EventEmitter,
-} from "events"
+import snackBarMessage from "./app/snackBarMessage"
 
 import Store from "electron-store"
 const db = new Store({
@@ -51,222 +28,22 @@ const db = new Store({
 
 import * as mdc from "material-components-web"
 
-const dirs = {
-    rootdir: path.parse(process.cwd()).root, // Root directory
-    tempdir: path.join(require("temp-dir"), "rosav"), // Temporary directory
-    homedir: require("os").homedir(), // Home directory
-    downdir: path.resolve(require("downloads-folder")()), // Downloads directory
-    storedir: path.join((electron.app || electron.remote.app).getPath("appData"), "rosav"), // Storage directory
-}
-
-const files = {
-    hashlist: path.join(dirs.storedir, "scanning", "hashlist.lzstring.json"), // Hashlist file
-    lastmodified: path.join(dirs.storedir, "scanning", "lastmodified.txt"), // Last modified file
-    hashesparams: path.join(dirs.storedir, "scanning", "hashesparams.txt"), // Hashlist parameters file
-    hashtxt: path.join(dirs.tempdir, "hashlist.txt"), // Temporary hashlist file
-}
+import dirs from "./utils/data/dirs"
 
 // Populate storage locations
-lib.populateDirectory(dirs.storedir)
-lib.populateDirectory(path.join(dirs.storedir, "scanning"))
-lib.populateDirectory(path.join(dirs.storedir, "quarantine"))
-lib.populateDirectory(path.join(dirs.storedir, "reports"))
-lib.populateDirectory(path.join(dirs.storedir, "plugins"))
-lib.populateDirectory(dirs.tempdir)
+fs.ensureDir(dirs.storedir)
+fs.ensureDir(path.join(dirs.storedir, "scanning"))
+fs.ensureDir(path.join(dirs.storedir, "quarantine"))
+fs.ensureDir(path.join(dirs.storedir, "reports"))
+fs.ensureDir(path.join(dirs.storedir, "plugins"))
+fs.ensureDir(dirs.tempdir)
 
 // Settings manager
-const manageSettings = async (el, name) => {
-    if (el.hasClass("mdc-select")) {
-        const mdcSelect = el.get(0).MDCSelect
-        const val = db.get(name)
-        if (typeof val !== "undefined") mdcSelect.value = val
-        mdcSelect.listen("MDCSelect:change", () => {
-            db.set(name, mdcSelect.value)
-        })
-    } else if (el.hasClass("mdc-text-field")) {
-        const mdcTextField = el
-        const val = db.get(name)
-        if (typeof val !== "undefined") mdcTextField.get(0).MDCTextField.value = val
-        mdcTextField.find("input").on("input", () => {
-            db.set(name, mdcTextField.get(0).MDCTextField.value)
-        })
-    } else if (el.hasClass("mdc-switch")) {
-        const mdcSwitch = el
-        const val = db.get(name)
-        if (typeof val !== "undefined") mdcSwitch.get(0).MDCSwitch.checked = val
-        mdcSwitch.find(".mdc-switch__native-control").on("change", () =>
-            db.set(name, mdcSwitch.get(0).MDCSwitch.checked)
-        )
-    } else {
-        snackBarMessage(`Error syncronising ${name}.`)
-    }
-}
+import manageSettings from "./app/manageSettings"
 
-const isJSON = (str) => {
-    try {
-        JSON.parse(str)
-    } catch (e) {
-        return false
-    }
-    return true
-}
+import openExplorer from "open-file-explorer"
 
-const runFile = (dir) => new Promise((resolve, reject) => {
-    // Read the file contents
-    fs.readFile(dir, (err, contents) => {
-        if (err) reject(err)
-        else {
-            try {
-                // Self containing function
-                (() => {
-                    // Evaluate contents
-                    eval(contents)
-                })()
-            } catch (err) {
-                reject(err)
-            }
-            resolve()
-        }
-    })
-})
-
-const runPlugin = (dir) => new Promise((resolve, reject) => {
-    // Get path stats
-    fs.stat(dir, (err, stats) => {
-        if (err) reject(err)
-
-        // Get path extension
-        const ext = dir.split(".")[0]
-
-        // If path is directory run index.js file inside of the directory
-        if (stats.isDirectory()) runFile(path.join(dir, "index.js")).then(resolve).catch(reject)
-
-        // If extension is JS run it
-        else if (ext === "js") runFile(dir).then(resolve).catch(reject)
-
-        // If extension is CSS run it
-        else if (ext === "css") {
-            $("head").append(`<link rel="stylesheet" href="${dir}">`)
-            resolve()
-        }
-
-        // If unknown reject
-        else reject(new TypeError("Only JS files, directories with JS files and CSS file allowed!"))
-    })
-})
-
-const update = (hashlist, hashesparams, lastmodified, temphashes) => {
-    const self = new EventEmitter()
-
-    // Download latest commit date of hash list
-    lib.githubapi("https://api.github.com/repos/Richienb/virusshare-hashes/commits/master", (err, _, {
-        commit,
-    }) => {
-        if (err) self.emit("error", err)
-
-        // Write date to file
-        if (isJSON(commit)) fs.writeFile(lastmodified, commit.author.date, () => {})
-    })
-
-    // Download hashlist
-    rprog(lib.request("https://media.githubusercontent.com/media/Richienb/virusshare-hashes/master/virushashes.txt"))
-        .on("error", (err) => self.emit("error", err))
-        .on("progress", ({
-            size,
-        }) => self.emit("progress", {
-            done: size.transferred / size.total / 2,
-            total: 1.0,
-        }))
-        .on("end", () => countFileLines(temphashes).then((lines) => {
-            const bestFilter = lib.bestForBloom(
-                lines, // Number of bits to allocate
-                1e-10, // Number of hash functions (currently set at 1/1 billion)
-            )
-
-            const hashes = new BloomFilter(
-                bestFilter.m,
-                bestFilter.k,
-            )
-
-            let done = 0
-
-            // Line reader
-            const hlr = new LineByLineReader(temphashes, {
-                encoding: "utf8",
-                skipEmptyLines: true,
-            })
-
-            // Line reader error
-            hlr.on("error", (err) => self.emit("error", err))
-
-            // New line from line reader
-            hlr.on("line", (line) => {
-                hashes.add(line)
-                done++
-                self.emit("progress", {
-                    done: done / lines + 0.5,
-                    total: 1.0,
-                })
-            })
-
-            // Line reader finished
-            hlr.on("end", () =>
-                fs.writeFile(hashlist, lzjs.compress(JSON.stringify([].slice.call(hashes.buckets))), (err) => {
-                    if (err) reject(err)
-                    fs.writeFile(hashesparams, bestFilter.k.toString(), () => self.emit("end"))
-                }))
-        }).catch((err) => self.emit("progress", err)))
-        .pipe(fs.createWriteStream(temphashes))
-    return self
-}
-
-const checkupdate = (hashlist, lastmodified) => new Promise((resolve, reject) => {
-    fs.access(hashlist, fs.constants.F_OK, (err) => {
-        if (err) {resolve({
-            fileexists: false,
-            outofdate: true,
-        })}
-        lib.githubapi("https://api.github.com/rate_limit", (err, _, {
-            resources,
-        }) => {
-            if (err) reject(err)
-
-            // Check the quota limit
-            if (resources.core.remaining === 0) {
-                // If no API quota remaining
-                resolve({
-                    quota: false,
-                    fileexists: true,
-                    reset: resources.core.reset,
-                    outofdate: false,
-                })
-            } else {
-                // Check for the latest commit
-                lib.githubapi("https://api.github.com/repos/Richienb/virusshare-hashes/commits/master", (err, _, {
-                    commit,
-                }) => {
-                    if (err) reject(err)
-
-                    // Get download date of hashlist
-                    const saved = dayjs(lastmodified)
-
-                    // Get latest commit date of hashlist
-                    const latest = dayjs(commit.author.date, "YYYY-MM-DDTHH:MM:SSZ")
-
-                    // Check if the saved version is older than the latest
-                    resolve({
-                        quota: true,
-                        fileexists: true,
-                        reset: resources.core.reset,
-                        outofdate: saved.isBefore(latest),
-                    })
-                })
-            }
-        })
-    })
-})
-
-window.onload = () => {
+window.onload = async () => {
     window.$ = require("jquery")
     // When a directory is selected set the textfield value to the selected path
     $(".scan--directory-helper").change(() =>
@@ -277,6 +54,8 @@ window.onload = () => {
     $(document).ready(() => {
         // When the choose directory button is clicked activate directory chooser
         $(".scan--directory-choose").click(() => $(".scan--directory-helper").click())
+
+        $(".plugin__folder").click(() => openExplorer(path.join(dirs.storedir, "plugins")))
 
         $(".scan--directory").get(0).MDCTextField.value = dirs.homedir
     })
@@ -310,10 +89,10 @@ window.onload = () => {
     $(".bar__max").click(() => {
         if (mainWindow.isMaximized()) {
             mainWindow.unmaximize()
-            $(".bar__max svg").html(`<path d="M4,4H20V20H4V4M6,8V18H18V8H6Z" />`)
+            $(".bar__max svg").html("<path d=\"M4,4H20V20H4V4M6,8V18H18V8H6Z\" />")
         } else {
             mainWindow.maximize()
-            $(".bar__max svg").html(`<path d="M4,8H8V4H20V16H16V20H4V8M16,8V14H18V6H10V8H16M6,12V18H14V12H6Z" />`)
+            $(".bar__max svg").html("<path d=\"M4,8H8V4H20V16H16V20H4V8M16,8V14H18V6H10V8H16M6,12V18H14V12H6Z\" />")
         }
     })
     $(".bar__min").click(() => mainWindow.minimize())
@@ -354,27 +133,27 @@ window.onload = () => {
                     })
                 })
             } else {
-                fs.readdir(path.resolve($(".scan--directory").get(0).MDCTextField.value), (err, files) => {
-                    if (err) snackBarMessage(`An error occurred: ${err}`)
+                fs.readdir(path.resolve($(".scan--directory").get(0).MDCTextField.value))
+                    .then((files) => {
+                        $(".app--progress").get(0).MDCLinearProgress.determinate = true
 
-                    $(".app--progress").get(0).MDCLinearProgress.determinate = true
+                        // Start progressbar
+                        total = files.length
 
-                    // Start progressbar
-                    total = files.length
-
-                    // For each file
-                    files.forEach((file) => {
-                        // If the MD5 hash is in the list
-                        if (hashesLoaded) {
-                            scan(file, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {
-                                done++
-                                $(".app--progress").get(0).MDCLinearProgress.progress = done / total
-                            }, (err) => {
-                                snackBarMessage(`A scanning error occurred: ${err}`)
-                            })
-                        }
+                        // For each file
+                        files.forEach((file) => {
+                            // If the MD5 hash is in the list
+                            if (hashesLoaded) {
+                                scan(file, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {
+                                    done++
+                                    $(".app--progress").get(0).MDCLinearProgress.progress = done / total
+                                }, (err) => {
+                                    snackBarMessage(`A scanning error occurred: ${err}`)
+                                })
+                            }
+                        })
                     })
-                })
+                    .catch(({message}) => snackBarMessage(`An error occurred: ${message}`))
             }
         })
     })
@@ -396,14 +175,14 @@ window.onload = () => {
             watcher
                 .on("add", (dir) => {
                     if (hashesLoaded) {
-                        scan(dir, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {}, (err) => {
+                        scan(dir, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => { }, (err) => {
                             if (err) snackBarMessage(`A scanning error occurred: ${err}`)
                         })
                     }
                 })
                 .on("change", (dir) => {
                     if (hashesLoaded) {
-                        scan(dir, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => {}, (err) => {
+                        scan(dir, $(".settings--threat-handling").get(0).MDCSelect.value).then(() => { }, (err) => {
                             if (err) snackBarMessage(`A scanning error occurred: ${err}`)
                         })
                     }
@@ -416,116 +195,63 @@ window.onload = () => {
 
     $(".settings--rtp").find(".mdc-switch__native-control").trigger("change")
 
-    const appIcon = process.platform === "darwin" ? path.join(__dirname, "build", "icons", "mac", "icon.icns") : path.join(__dirname, "build", "icons", "win", "icon.ico")
-
-    // Display snackbar message
-    const snackBarMessage = (message, volume = 0.0) => {
-        const snackbar = $(".main--snackbar").get(0).MDCSnackbar
-        snackbar.close()
-        snackbar.labelText = message
-        snackbar.open()
-        notifier.notify({
-            title: "ROS AV",
-            message,
-            icon: appIcon,
-            sound: false,
-        })
-        if (volume > 0.0) {
-            $(".ping").get(0).volume = volume
-            $(".ping").get(0).play()
-        }
-    }
 
     // If hashes have loaded
-    let hashesLoaded = false
-
-    let hashes
-
-    const scan = (dir, action) => new Promise((resolve, reject) => {
-        // Check if file is safe
-        lib.safe(dir, hashes).then(({
-            safe,
-        }) => {
-            if (!safe) {
-                if (action === "remove") {
-                    // Delete the file
-                    fs.unlink(file, (err) => {
-                        if (err) reject(err)
-                        snackBarMessage(`${file} was identified as a threat and was deleted.`, 0.1)
-                        resolve({
-                            safe: false,
-                        })
-                    })
-                } else if (action === "quarantine") {
-                    fs.rename(file, path.resolve(args.data, "quarantine", path.basename(file)), (err) => {
-                        if (err) reject(err)
-                        snackBarMessage(`${file} was identified as a threat and was quarantined.`, 0.1)
-                        resolve({
-                            safe: false,
-                        })
-                    })
-                } else {
-                    resolve({
-                        safe: false,
-                    })
-                }
-            } else {
-                resolve({
-                    safe: true,
-                })
-            }
-        }).catch((e) => reject(e))
-    })
-
-    // Check for updates
-    checkupdate(files.hashlist, files.lastmodified).then(({
-        outofdate,
-    }) => {
-        // If not out of date load hashes
-        if (!outofdate) {
-            lib.loadHashes(files.hashlist, files.hashesparams).then((o) => {
-                hashes = o
-                hashesLoaded = true
-                $(".app--progress").get(0).MDCLinearProgress.close()
-            })
-        }
-
-        // If out of date update hashes
-        else {
-            // Make progress bar determinate
-            $(".app--progress").get(0).MDCLinearProgress.determinate = true
-            const u = update(files.hashlist, files.hashesparams, files.lastmodified, files.hashtxt)
-            // When progress occurred
-            u.on("progress", ({
-                done,
-                total,
-            }) => {
-                // Make progress bar determinate
-                document.querySelector(".app--progress").MDCLinearProgress.progress = done / total
-            })
-            // When complete
-            u.on("end", () => {
-                // Load hashes
-                lib.loadHashes(files.hashlist, files.hashesparams).then((o) => {
-                    hashes = o
-                    hashesLoaded = true
-                    $(".app--progress").get(0).MDCLinearProgress.close()
-                })
-            })
-        }
-    })
+    const hashesLoaded = false
 
     // Execute plugins
-    fs.readdir(path.join(dirs.storedir, "plugins"), (err, items) => {
-        if (err) snackBarMessage(`Failed to load plugins because ${err}`)
+    fs.readdir(path.join(dirs.storedir, "plugins"))
+        .then((items) => {
+            // If no plugins installed
+            if (!items) {
+                $(".app--progress").get(0).MDCLinearProgress.close()
+                return
+            }
 
-        // If no plugins installed
-        if (!items) return
+            const total = items.length
+            let loaded = 0
 
-        // For each item in directory
-        items.forEach((dir) =>
-            runPlugin(path.join(dirs.storedir, "plugins", dir))
-            .then(() => snackBarMessage(`Successfully loaded ${dir}`))
-            .catch((err) => snackBarMessage(`Failed to load ${dir} because ${err}`)))
-    })
+            // For each item in directory
+            items.forEach((dir) => {
+                const p = require(path.join(dirs.storedir, "plugins", dir))
+                p.onLoad()
+                    .then(() => {
+                        loaded++
+                        $(".app--progress").get(0).MDCLinearProgress.progress = loaded / total
+                        $(".app--progress").get(0).MDCLinearProgress.determinate = true
+                        if (loaded === total) $(".app--progress").get(0).MDCLinearProgress.close()
+
+                        const el = $(".plugin__list").append(`
+                <div class="mdc-layout-grid__cell">
+                            <div class="mdc-card mdc-card--outlined">
+                                <div class="mdc-card__primary">
+                                    <h2 class="mdc-card__title mdc-typography mdc-typography--headline6">${p.info.name}</h2>
+                                    <h3 class="mdc-card__subtitle mdc-typography mdc-typography--subtitle2">by ${p.info.author}</h3>
+                                </div>
+                                <div class="mdc-card__secondary mdc-typography mdc-typography--body2">${p.info.description}</div>
+                                <div class="mdc-card__actions">
+                                    <div class="mdc-card__action-buttons">
+                                        <button class="mdc-button mdc-card__action mdc-card__action--button" data-mdc-auto-init="MDCRipple">Details</button>
+                                        <button class="mdc-button mdc-card__action mdc-card__action--button" data-mdc-auto-init="MDCRipple">Remove</button>
+                                    </div>
+                                    <div class="mdc-card__action-icons">
+                                        <div class="plugin__switch mdc-switch" data-mdc-auto-init="MDCSwitch">
+                                            <div class="mdc-switch__track"></div>
+                                            <div class="mdc-switch__thumb-underlay">
+                                                <div class="mdc-switch__thumb">
+                                                    <input type="checkbox" class="mdc-switch__native-control" role="switch">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+            `)
+                        mdc.autoInit(el.get(0))
+                    })
+                    .catch(({message}) => snackBarMessage(`Failed to load ${dir} because ${message}`))
+            }
+            )
+        })
 }
