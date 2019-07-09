@@ -100,7 +100,7 @@
         "bluebird": "^3.5.5",
         "chokidar": "^3.0.2",
         "count-lines-in-file": "^1.1.0",
-        "dayjs": "^1.8.14",
+        "dayjs": "^1.8.15",
         "downloads-folder": "^1.0.1",
         "electron-squirrel-startup": "^1.0.0",
         "electron-store": "^4.0.0",
