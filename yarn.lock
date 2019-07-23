@@ -388,15 +388,15 @@
     "@material/typography" "^3.0.0"
     tslib "^1.9.3"
 
-"@material/icon-button@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@material/icon-button/-/icon-button-3.0.0.tgz#41069c75a06eb848729f43452e17af6556cf2028"
-  integrity sha512-vgRZepu9MiTl+KDTpatysiM39EBNi8aearDwIaXQHI8OK/z4ac/je1ysv2NP0dY5m5dUPFVrHcFx7oVX9xV1+w==
+"@material/icon-button@^3.0.0", "@material/icon-button@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@material/icon-button/-/icon-button-3.1.0.tgz#843d6526a47a20ec2bf9b1ba668c33ccc9a7eca7"
+  integrity sha512-iwcZ6OEgJYOpB0Ptjk2yuOoRPYhvLqaqVPYO4aJ3U8oQEAfVIRcTvP7IsmVab6MQIsNMBDiObToN4sw2brmOBg==
   dependencies:
-    "@material/base" "^3.0.0"
-    "@material/feature-targeting" "^3.0.0"
-    "@material/ripple" "^3.0.0"
-    "@material/theme" "^3.0.0"
+    "@material/base" "^3.1.0"
+    "@material/feature-targeting" "^3.1.0"
+    "@material/ripple" "^3.1.0"
+    "@material/theme" "^3.1.0"
     tslib "^1.9.3"
 
 "@material/image-list@^3.0.0":
