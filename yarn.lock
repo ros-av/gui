@@ -434,19 +434,19 @@
     "@material/theme" "^3.1.0"
     tslib "^1.9.3"
 
-"@material/list@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@material/list/-/list-3.0.0.tgz#bdb89910dfa44a02efea76f1c5c0545534c63081"
-  integrity sha512-/6xre286llvaQQWBOoixMN11yGldg652inwsOA+cByOT01FoUm5zqERlURpApMlvj0oAha9FxHRSyqaEZ3Oc2w==
+"@material/list@^3.0.0", "@material/list@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@material/list/-/list-3.1.0.tgz#d575e801c634e992bf40344dc0917b56947a3cb9"
+  integrity sha512-JBru3jtHHZPUCAmyLGAvZewERQYzG6DK43hvLRETuChQYfER/PJGh9Kbttr+7c0Qr+yvpf5kVgNUkY2AKnPEKg==
   dependencies:
-    "@material/base" "^3.0.0"
-    "@material/dom" "^3.0.0"
-    "@material/feature-targeting" "^3.0.0"
-    "@material/ripple" "^3.0.0"
-    "@material/rtl" "^3.0.0"
-    "@material/shape" "^3.0.0"
-    "@material/theme" "^3.0.0"
-    "@material/typography" "^3.0.0"
+    "@material/base" "^3.1.0"
+    "@material/dom" "^3.1.0"
+    "@material/feature-targeting" "^3.1.0"
+    "@material/ripple" "^3.1.0"
+    "@material/rtl" "^3.1.0"
+    "@material/shape" "^3.1.0"
+    "@material/theme" "^3.1.0"
+    "@material/typography" "^3.1.0"
     tslib "^1.9.3"
 
 "@material/menu-surface@^3.0.0":
