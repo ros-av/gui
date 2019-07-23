@@ -211,12 +211,12 @@
   dependencies:
     tslib "^1.9.3"
 
-"@material/auto-init@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@material/auto-init/-/auto-init-3.0.0.tgz#2047a717761d9c2aec73174c98ef5f6fb6f59d9e"
-  integrity sha512-svfoUupWj0oZkPbviLifhfcRWdFDuHmOYdJz5p3nXQteTCZxSQILw6hu5y8IoV9YEwD+QosHu5elpgM6kfE8wA==
+"@material/auto-init@^3.0.0", "@material/auto-init@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@material/auto-init/-/auto-init-3.1.0.tgz#bf2b1dcc12d9c09b1f6182f0ac0dba7c0986883c"
+  integrity sha512-Q0fuycL7JUyody+V9h8Y3mXlchNECOwCWOWwjJutcxeIqmhVJxf5qiJJnXZYrwQMMtUuO2A2DTHdrxCITL2COA==
   dependencies:
-    "@material/base" "^3.0.0"
+    "@material/base" "^3.1.0"
     tslib "^1.9.3"
 
 "@material/base@^3.0.0", "@material/base@^3.1.0":
