@@ -108,7 +108,7 @@
         "fast-glob": "^3.0.4",
         "firstline": "^2.0.2",
         "fs-extra": "^8.1.0",
-        "graceful-fs": "^4.2.1",
+        "graceful-fs": "^4.2.2",
         "jquery": "^3.4.1",
         "line-by-line": "^0.1.6",
         "lz-string": "^1.4.4",
