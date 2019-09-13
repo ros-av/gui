@@ -535,24 +535,7 @@
     "@material/theme" "^3.1.0"
     tslib "^1.9.3"
 
-"@material/ripple@^3.2.0":
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/@material/ripple/-/ripple-3.2.0.tgz#f4b714834b73b793b280024d4ebcca01018df3bd"
-  integrity sha512-GtwkfNakALmfGLs6TpdFIVeAWjRqbyT7WfEw9aU7elUokABfHES+O0KoSKQSMQiSQ8Vjl90MONzNsN1Evi/1YQ==
-  dependencies:
-    "@material/animation" "^3.1.0"
-    "@material/base" "^3.1.0"
-    "@material/dom" "^3.1.0"
-    "@material/feature-targeting" "^3.1.0"
-    "@material/theme" "^3.1.0"
-    tslib "^1.9.3"
-
-"@material/rtl@^3.1.0":
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/@material/rtl/-/rtl-3.1.0.tgz#8a5254bcf6c4d897e16206d52ba98b8eb98d45b7"
-  integrity sha512-HH19edQNb139zC+1SZ6/C9G92E54fUrnnW9AAF7t5eGjGdF26YJXJ/uhz+TnFhNUMi/QGrKUSycd4o73nU1m4A==
-
-"@material/rtl@^3.2.0":
+"@material/rtl@^3.1.0", "@material/rtl@^3.2.0":
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/@material/rtl/-/rtl-3.2.0.tgz#0b2f7321463100674dfbf4507b54ccd052f05378"
   integrity sha512-L/w9m9Yx1ceOw/VjEfeJoqD4rW9QP3IBb9MamXAg3qUi/zsztoXD/FUw179pxkLn4huFFNlVYZ4Y1y6BpM0PMA==
@@ -704,17 +687,17 @@
   dependencies:
     "@material/feature-targeting" "^3.1.0"
 
-"@material/top-app-bar@^3.1.0":
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/@material/top-app-bar/-/top-app-bar-3.1.0.tgz#1610dac4d85263195ccca55d8a362453cf9ceca2"
-  integrity sha512-wqxcLFmIOflvQN/g3VZacPrWOy2bCtxXYKdIAIfmfnLs8+ahO5DYzI+Y57eumIVTQUVc8PXAMMiUoWiWQ1/dRQ==
+"@material/top-app-bar@^3.1.0", "@material/top-app-bar@^3.2.0":
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/@material/top-app-bar/-/top-app-bar-3.2.0.tgz#2bc50bd30d782bacf29fe9a65b5644aca1fd2cf0"
+  integrity sha512-p3PuCIbg0uDveS30D1R8/fcwqeTMXe4oRFnB6Z5Wlej0NySi6038i+TPsHtgYLCR3QpVThnkVch37zyXcNpQoQ==
   dependencies:
     "@material/animation" "^3.1.0"
     "@material/base" "^3.1.0"
     "@material/elevation" "^3.1.0"
-    "@material/icon-button" "^3.1.0"
-    "@material/ripple" "^3.1.0"
-    "@material/rtl" "^3.1.0"
+    "@material/icon-button" "^3.2.0"
+    "@material/ripple" "^3.2.0"
+    "@material/rtl" "^3.2.0"
     "@material/shape" "^3.1.0"
     "@material/theme" "^3.1.0"
     "@material/typography" "^3.1.0"

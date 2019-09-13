@@ -92,7 +92,7 @@
         "@material/tab-bar": "^3.2.0",
         "@material/tab-indicator": "^3.0.0",
         "@material/textfield": "^3.1.0",
-        "@material/top-app-bar": "^3.1.0",
+        "@material/top-app-bar": "^3.2.0",
         "@octokit/rest": "^16.28.9",
         "@sentry/electron": "^0.17.3",
         "auto-launch": "^5.0.5",
