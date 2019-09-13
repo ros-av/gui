@@ -523,10 +523,10 @@
     "@material/theme" "^3.1.0"
     tslib "^1.9.3"
 
-"@material/ripple@^3.1.0":
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/@material/ripple/-/ripple-3.1.0.tgz#5cb581e9a70415c50c8b92ecd8628d5eeae34c74"
-  integrity sha512-mYvd2iWbQyVd6aLS9alHShoL05p/D0cvh5h1ga3atz55azooMLhGsbbE1YlEqUDKHKNuNvdVFm+0IfWdvvRgsw==
+"@material/ripple@^3.1.0", "@material/ripple@^3.2.0":
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/@material/ripple/-/ripple-3.2.0.tgz#f4b714834b73b793b280024d4ebcca01018df3bd"
+  integrity sha512-GtwkfNakALmfGLs6TpdFIVeAWjRqbyT7WfEw9aU7elUokABfHES+O0KoSKQSMQiSQ8Vjl90MONzNsN1Evi/1YQ==
   dependencies:
     "@material/animation" "^3.1.0"
     "@material/base" "^3.1.0"
@@ -535,10 +535,10 @@
     "@material/theme" "^3.1.0"
     tslib "^1.9.3"
 
-"@material/rtl@^3.1.0":
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/@material/rtl/-/rtl-3.1.0.tgz#8a5254bcf6c4d897e16206d52ba98b8eb98d45b7"
-  integrity sha512-HH19edQNb139zC+1SZ6/C9G92E54fUrnnW9AAF7t5eGjGdF26YJXJ/uhz+TnFhNUMi/QGrKUSycd4o73nU1m4A==
+"@material/rtl@^3.1.0", "@material/rtl@^3.2.0":
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/@material/rtl/-/rtl-3.2.0.tgz#0b2f7321463100674dfbf4507b54ccd052f05378"
+  integrity sha512-L/w9m9Yx1ceOw/VjEfeJoqD4rW9QP3IBb9MamXAg3qUi/zsztoXD/FUw179pxkLn4huFFNlVYZ4Y1y6BpM0PMA==
 
 "@material/select@^3.1.0":
   version "3.1.0"
@@ -648,15 +648,15 @@
     "@material/tab" "^3.1.0"
     tslib "^1.9.3"
 
-"@material/tab@^3.0.0", "@material/tab@^3.1.0":
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/@material/tab/-/tab-3.1.0.tgz#7bb863d347cf8a8c91489921ec98cc86c6b5f318"
-  integrity sha512-AcHlmS5l0rjHTEP1GuVVt6F7h8NqzlLMM1cXabHTrZYPvF2QwHnFnMesE74TJPHArW9xMgP7wYsJ88ZREolRow==
+"@material/tab@^3.1.0", "@material/tab@^3.2.0":
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/@material/tab/-/tab-3.2.0.tgz#6db251162cf9069263b2c40243ece0cc71ee3964"
+  integrity sha512-O1/ZrBQ/g+fI8jrrpfBDq55BhEPISrFvZeiIVQshQuyZh5bLYYhjMXbOsjC1UYu11rWqAiP+8jDgIyxQT9DHwQ==
   dependencies:
     "@material/base" "^3.1.0"
     "@material/feature-targeting" "^3.1.0"
-    "@material/ripple" "^3.1.0"
-    "@material/rtl" "^3.1.0"
+    "@material/ripple" "^3.2.0"
+    "@material/rtl" "^3.2.0"
     "@material/tab-indicator" "^3.1.0"
     "@material/theme" "^3.1.0"
     "@material/typography" "^3.1.0"
