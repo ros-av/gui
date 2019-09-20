@@ -98,7 +98,7 @@
         "auto-launch": "^5.0.5",
         "bloomfilter": "^0.0.18",
         "bluebird": "^3.5.5",
-        "chokidar": "^3.1.0",
+        "chokidar": "^3.1.1",
         "count-lines-in-file": "^1.1.0",
         "dayjs": "^1.8.16",
         "downloads-folder": "^1.0.1",
