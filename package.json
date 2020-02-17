@@ -105,7 +105,7 @@
         "electron-squirrel-startup": "^1.0.0",
         "electron-store": "^4.0.0",
         "esm": "^3.2.25",
-        "fast-glob": "^3.0.4",
+        "fast-glob": "^3.2.0",
         "firstline": "^2.0.2",
         "fs-extra": "^8.1.0",
         "graceful-fs": "^4.2.2",
